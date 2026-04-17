@@ -1,0 +1,3728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyloom — Novel Workshop</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c2b1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Storyloom">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c2b1a;
+    --parchment: #f4f1e8;
+    --cream: #faf9f4;
+    --warm-mid: #e6e2d3;
+    --accent: #2d6a4f;
+    --accent-hover: #1b4332;
+    --accent-soft: #d8f3dc;
+    --gold: #74785a;
+    --gold-light: #f0f0e4;
+    --slate: #3a4a38;
+    --muted: #6b7a60;
+    --border: #d4cfc0;
+    --border-light: #e8e4d8;
+    --shadow: 0 2px 12px rgba(28,43,26,0.08);
+    --shadow-lg: 0 8px 32px rgba(28,43,26,0.14);
+    --ai-purple: #5c6bc0;
+    --ai-purple-soft: #e8eaf6;
+    --ai-purple-mid: #c5cae9;
+    --paper: #fffef7;
+    --paper-rule: #e9e6d8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--parchment);
+    padding: 0 20px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    border-bottom: 2px solid #52b788;
+  }
+  .logo { font-family: 'Playfair Display','Noto Serif KR',serif; font-size: 22px; letter-spacing: 0.02em; color: var(--parchment); }
+  .logo span { color: #74c69d; font-style: italic; }
+  .header-right { display: flex; gap: 10px; align-items: center; }
+
+  .lang-switcher { display: flex; gap: 2px; background: rgba(255,255,255,0.08); border-radius: 6px; padding: 3px; }
+  .lang-btn {
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 4px; border: none; cursor: pointer;
+    background: transparent; color: rgba(247,243,236,0.5); transition: all 0.15s; letter-spacing: 0.05em;
+  }
+  .lang-btn.active { background: var(--accent); color: white; }
+  .lang-btn:hover:not(.active) { color: var(--parchment); background: rgba(255,255,255,0.1); }
+
+  .btn {
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-ghost { background: transparent; color: var(--parchment); border: 1px solid rgba(247,243,236,0.25); }
+  .btn-ghost:hover { background: rgba(247,243,236,0.1); }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover { background: var(--accent-hover); }
+
+  /* SYNC BUTTON */
+  .btn-sync {
+    background: transparent;
+    color: rgba(247,243,236,0.6);
+    border: 1px solid rgba(247,243,236,0.2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .btn-sync:hover { background: rgba(247,243,236,0.08); color: var(--parchment); border-color: rgba(247,243,236,0.4); }
+  .btn-sync.has-changes {
+    color: #fbbf24;
+    border-color: #fbbf24;
+    animation: syncPulse 2s ease infinite;
+  }
+  .btn-sync.has-changes:hover { background: rgba(251,191,36,0.12); }
+  .btn-sync.syncing .sync-icon { animation: spinSync 0.6s linear infinite; }
+  .btn-sync.just-synced { color: #4ade80; border-color: #4ade80; }
+  @keyframes syncPulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
+  @keyframes spinSync { to { transform: rotate(360deg); } }
+  .sync-icon { display: inline-block; font-size: 13px; line-height: 1; }
+  .sync-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #fbbf24;
+    border: 2px solid var(--ink);
+    display: none;
+  }
+  .btn-sync.has-changes .sync-badge { display: block; }
+
+  /* TAB BAR */
+  .tab-bar { background: var(--ink); display: flex; padding: 0 20px; border-bottom: 1px solid rgba(247,243,236,0.12); flex-shrink: 0; }
+  .tab {
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 18px;
+    color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.2s; user-select: none; white-space: nowrap;
+  }
+  .tab:hover { color: var(--parchment); }
+  .tab.active { color: var(--parchment); border-bottom-color: #74c69d; }
+
+  /* WORKSPACE */
+  .workspace { display: flex; flex: 1; overflow: hidden; }
+  .panel { display: none; width: 100%; height: 100%; }
+  .panel.active { display: flex; }
+  #panel-split { display: none; }
+  #panel-split.active { display: flex; flex-direction: row; }
+
+  .divider { width: 4px; background: var(--border); cursor: col-resize; flex-shrink: 0; transition: background 0.2s; }
+  .divider:hover, .divider.dragging { background: var(--accent); }
+
+  /* DOC EDITOR */
+  .doc-panel { display: flex; flex-direction: column; background: var(--cream); min-width: 300px; flex: 1; overflow: hidden; }
+  .doc-toolbar {
+    padding: 8px 16px; background: var(--parchment); border-bottom: 1px solid var(--border);
+    display: flex; gap: 4px; align-items: center; flex-wrap: wrap; flex-shrink: 0;
+  }
+  .doc-toolbar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 3px; }
+  .tool-btn {
+    font-size: 13px; padding: 4px 8px; border: 1px solid transparent; border-radius: 3px;
+    cursor: pointer; background: transparent; color: var(--slate); font-family: 'DM Sans',sans-serif;
+    transition: all 0.12s; line-height: 1; white-space: nowrap;
+  }
+  .tool-btn:hover { background: var(--warm-mid); border-color: var(--border); }
+
+  .btn-ai-refine {
+    font-family: 'DM Sans','Noto Sans KR',sans-serif; font-size: 12px; font-weight: 600;
+    padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--ai-purple);
+    background: var(--ai-purple-soft); color: var(--ai-purple); cursor: pointer;
+    display: flex; align-items: center; gap: 5px; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-ai-refine:hover { background: var(--ai-purple); color: white; }
+
+  .doc-body { display: flex; flex: 1; overflow: hidden; }
+  .doc-editor-wrap { flex: 1; overflow-y: auto; padding: 48px 60px; }
+  .doc-editor-wrap::-webkit-scrollbar { width: 6px; }
+  .doc-editor-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .doc-editor-el {
+    min-height: 100%; outline: none; font-size: 17px; line-height: 2.0; color: var(--ink);
+    max-width: 680px; margin: 0 auto; caret-color: var(--accent);
+    background: var(--paper);
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent calc(2em - 1px),
+      var(--paper-rule) calc(2em - 1px),
+      var(--paper-rule) 2em
+    );
+    background-attachment: local;
+    padding: 24px 40px 48px;
+    border-radius: 4px;
+    box-shadow: 0 1px 8px rgba(28,43,26,0.06), 0 0 0 1px var(--border-light);
+  }
+  body.lang-en .doc-editor-el { font-family: 'Playfair Display', serif; }
+  body.lang-ko .doc-editor-el { font-family: 'Noto Serif KR', serif; font-size: 16px; }
+  .doc-editor-el h1 { font-size: 28px; margin-bottom: 16px; font-weight: 700; }
+  .doc-editor-el h2 { font-size: 22px; margin: 20px 0 12px; font-weight: 700; }
+  .doc-editor-el p { margin-bottom: 12px; }
+  .doc-editor-el .char-mention { background: var(--accent-soft); color: var(--accent); border-radius: 3px; padding: 0 3px; font-style: italic; cursor: pointer; }
+  .doc-editor-el .event-mention { background: var(--gold-light); color: var(--gold); border-radius: 3px; padding: 0 3px; cursor: pointer; }
+
+  /* AI SIDEBAR */
+  .ai-sidebar {
+    width: 0; overflow: hidden; transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+    background: #faf8ff; border-left: 1px solid var(--ai-purple-mid);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .ai-sidebar.open { width: 360px; }
+  .ai-sidebar-inner { width: 360px; display: flex; flex-direction: column; height: 100%; }
+  .ai-sidebar-header {
+    padding: 14px 18px; background: linear-gradient(135deg,#7c3aed,#5b21b6); color: white;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .ai-sidebar-title { font-family: 'DM Sans','Noto Sans KR',sans-serif; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .ai-close-btn {
+    background: rgba(255,255,255,0.2); border: none; color: white;
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+  }
+  .ai-close-btn:hover { background: rgba(255,255,255,0.35); }
+
+  .ai-options { padding: 14px 18px; border-bottom: 1px solid var(--ai-purple-mid); flex-shrink: 0; background: white; }
+  .ai-option-label {
+    font-family: 'DM Mono',monospace; font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px;
+  }
+  .ai-mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+  .ai-mode-btn {
+    padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--ai-purple-mid);
+    background: var(--ai-purple-soft); color: var(--ai-purple); font-size: 12px; font-weight: 600;
+    cursor: pointer; text-align: center; transition: all 0.15s;
+    font-family: 'DM Sans','Noto Sans KR',sans-serif; line-height: 1.3;
+  }
+  .ai-mode-btn:hover, .ai-mode-btn.selected { background: var(--ai-purple); color: white; border-color: var(--ai-purple); }
+  .ai-mode-btn .mode-icon { font-size: 16px; display: block; margin-bottom: 3px; }
+  .ai-scope-row { display: flex; gap: 6px; align-items: center; }
+  .ai-scope-btn {
+    flex: 1; padding: 6px; border-radius: 6px; border: 1.5px solid var(--border); background: white;
+    font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s;
+    font-family: 'DM Mono',monospace; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em;
+  }
+  .ai-scope-btn.selected { border-color: var(--ai-purple); background: var(--ai-purple-soft); color: var(--ai-purple); }
+  .ai-run-btn {
+    width: 100%; margin-top: 10px; padding: 10px; border-radius: 8px; border: none;
+    background: linear-gradient(135deg,#7c3aed,#5b21b6); color: white;
+    font-family: 'DM Sans','Noto Sans KR',sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s;
+  }
+  .ai-run-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .ai-run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .ai-result-area { flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .ai-result-area::-webkit-scrollbar { width: 4px; }
+  .ai-result-area::-webkit-scrollbar-thumb { background: var(--ai-purple-mid); border-radius: 2px; }
+  .ai-result-box { background: white; border: 1.5px solid var(--ai-purple-mid); border-radius: 10px; overflow: hidden; }
+  .ai-result-label {
+    padding: 8px 12px; background: var(--ai-purple-soft);
+    font-family: 'DM Mono',monospace; font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--ai-purple);
+    border-bottom: 1px solid var(--ai-purple-mid); display: flex; align-items: center; justify-content: space-between;
+  }
+  .ai-result-text {
+    padding: 14px; font-size: 14px; line-height: 1.75; color: var(--ink); white-space: pre-wrap;
+  }
+  body.lang-ko .ai-result-text { font-family: 'Noto Serif KR',serif; font-size: 13px; }
+  .ai-accept-btn {
+    width: 100%; padding: 10px; border: none; background: #ecfdf5; color: #16a34a;
+    font-family: 'DM Sans','Noto Sans KR',sans-serif; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; border-top: 1px solid #bbf7d0;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .ai-accept-btn:hover { background: #16a34a; color: white; }
+  .ai-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; gap: 12px; }
+  .ai-spinner { width: 32px; height: 32px; border: 3px solid var(--ai-purple-mid); border-top-color: var(--ai-purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ai-loading-text { font-family: 'DM Mono',monospace; font-size: 12px; color: var(--ai-purple); animation: blink 1.2s ease infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .ai-empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .ai-empty-state .ai-icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* WORD COUNT */
+  .word-count {
+    padding: 7px 20px; font-family: 'DM Mono',monospace; font-size: 11px; color: var(--muted);
+    background: var(--parchment); border-top: 1px solid var(--border);
+    display: flex; gap: 16px; flex-shrink: 0; align-items: center;
+  }
+  .lang-indicator { margin-left: auto; font-size: 10px; background: var(--warm-mid); padding: 2px 8px; border-radius: 10px; color: var(--slate); }
+
+  /* BOARD */
+  .board-panel { display: flex; flex-direction: column; background: var(--parchment); min-width: 300px; flex: 1; overflow: hidden; }
+  .board-toolbar {
+    padding: 10px 16px; background: var(--parchment); border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap;
+  }
+  .board-toolbar .label { font-family: 'DM Mono',monospace; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-right: 4px; }
+  .add-btn { font-family: 'DM Sans','Noto Sans KR',sans-serif; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; border: 1.5px solid; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .add-character { border-color: #2d6a4f; color: #2d6a4f; background: #d8f3dc; }
+  .add-character:hover { background: #2d6a4f; color: white; }
+  .add-main { border-color: #0284c7; color: #0284c7; background: #f0f9ff; }
+  .add-main:hover { background: #0284c7; color: white; }
+  .add-minor { border-color: #16a34a; color: #16a34a; background: #f0fdf4; }
+  .add-minor:hover { background: #16a34a; color: white; }
+  .add-connect { border-color: #7c3aed; color: #7c3aed; background: #faf5ff; }
+  .add-connect:hover { background: #7c3aed; color: white; }
+  .board-sections { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 24px; }
+  .board-sections::-webkit-scrollbar { width: 6px; }
+  .board-sections::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .board-section-title { font-family: 'DM Mono',monospace; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .board-section-title::after { content:''; flex:1; height:1px; background: var(--border); }
+  .cards-row { display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; }
+
+  /* CARDS */
+  .card { border-radius: 8px; border: 1.5px solid; padding: 12px 14px; width: 200px; cursor: grab; transition: box-shadow 0.15s, transform 0.15s; position: relative; user-select: none; flex-shrink: 0; }
+  .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .card.dragging { opacity: 0.5; cursor: grabbing; }
+  .card.drag-over { outline: 2px dashed var(--accent); outline-offset: 2px; }
+  .card-character { background: #f0fdf4; border-color: #86efac; }
+  .card-main { background: #f0f9ff; border-color: #7dd3fc; }
+  .card-minor { background: #f0fdf4; border-color: #86efac; }
+  .card-connect { background: #faf5ff; border-color: #c4b5fd; }
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; gap: 6px; }
+  .card-tag { font-family: 'DM Mono',monospace; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; padding: 2px 6px; border-radius: 10px; }
+  .tag-character { background: #2d6a4f; color: white; }
+  .tag-main { background: #0284c7; color: white; }
+  .tag-minor { background: #16a34a; color: white; }
+  .tag-connect { background: #7c3aed; color: white; }
+  .card-menu-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 14px; padding: 0 2px; opacity: 0; transition: opacity 0.15s; line-height: 1; }
+  .card:hover .card-menu-btn { opacity: 1; }
+  .card-name { font-family: 'Playfair Display','Noto Serif KR',serif; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; line-height: 1.3; }
+  .card-desc { font-size: 11px; color: var(--slate); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-avatar { width: 36px; height: 36px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display','Noto Serif KR',serif; font-size: 14px; font-weight: 700; flex-shrink: 0; margin-bottom: 8px; }
+  .card-order-badge { position: absolute; top: -8px; left: -8px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: white; font-family: 'DM Mono',monospace; font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+  .card-del { background: none; border: none; cursor: pointer; color: #ef4444; font-size: 12px; padding: 2px 4px; opacity: 0; transition: opacity 0.15s; line-height: 1; }
+  .card:hover .card-del { opacity: 0.6; }
+  .card-del:hover { opacity: 1 !important; }
+  .empty-state { padding: 20px; text-align: center; color: var(--muted); font-size: 12px; font-style: italic; border: 1.5px dashed var(--border); border-radius: 8px; width: 100%; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(26,20,16,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+  .modal-overlay.open { display: flex; }
+
+  /* ── SMART SYNC MODAL ── */
+  .ssync-overlay {
+    position: fixed; inset: 0; background: rgba(26,20,16,0.6);
+    z-index: 1500; display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(3px);
+  }
+  .ssync-overlay.open { display: flex; }
+  .ssync-modal {
+    background: var(--cream); border-radius: 16px;
+    width: 640px; max-width: 96vw; max-height: 88vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4); border: 1px solid var(--border);
+    animation: modalIn 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  .ssync-header {
+    padding: 20px 26px 16px; flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  }
+  .ssync-title { font-family:'Playfair Display','Noto Serif KR',serif; font-size: 20px; color: var(--ink); }
+  .ssync-subtitle { font-size: 12px; color: var(--muted); margin-top: 4px; font-family:'DM Mono',monospace; }
+  .ssync-close { background: var(--warm-mid); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 13px; color: var(--slate); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition: background .15s; }
+  .ssync-close:hover { background: var(--border); }
+
+  .ssync-body { flex: 1; overflow-y: auto; padding: 20px 26px; display: flex; flex-direction: column; gap: 8px; }
+  .ssync-body::-webkit-scrollbar { width: 5px; }
+  .ssync-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .ssync-section-title {
+    font-family:'DM Mono',monospace; font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .12em; color: var(--muted);
+    padding: 12px 0 6px; border-top: 1px solid var(--border); margin-top: 4px;
+  }
+  .ssync-section-title:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+
+  .ssync-change {
+    background: white; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 13px 14px; display: flex; align-items: flex-start; gap: 12px;
+    transition: border-color .15s, background .15s;
+  }
+  .ssync-change.approved { border-color: #86efac; background: #f0fdf4; }
+  .ssync-change.rejected { border-color: var(--border); background: var(--warm-mid); opacity: .55; }
+
+  .ssync-change-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .ssync-change-body { flex: 1; min-width: 0; }
+  .ssync-change-label {
+    font-family:'DM Mono',monospace; font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .1em; margin-bottom: 3px;
+  }
+  .ssync-change-label.add-char { color: #2d6a4f; }
+  .ssync-change-label.add-event { color: #0284c7; }
+  .ssync-change-label.missing-char { color: #7c3aed; }
+  .ssync-change-label.missing-event { color: #74785a; }
+  .ssync-change-name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+  .ssync-change-desc { font-size: 12px; color: var(--slate); line-height: 1.5; }
+  .ssync-change-detail { font-size: 11px; color: var(--muted); margin-top: 4px; font-family:'DM Mono',monospace; }
+
+  .ssync-toggle {
+    display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; align-items: flex-end;
+  }
+  .ssync-approve-btn, .ssync-reject-btn {
+    padding: 4px 12px; border-radius: 20px; border: 1.5px solid; font-size: 11px;
+    font-weight: 600; cursor: pointer; font-family:'DM Sans',sans-serif; transition: all .15s;
+    white-space: nowrap;
+  }
+  .ssync-approve-btn { border-color: #86efac; color: #16a34a; background: white; }
+  .ssync-approve-btn:hover, .ssync-approve-btn.active { background: #16a34a; color: white; border-color: #16a34a; }
+  .ssync-reject-btn { border-color: var(--border); color: var(--muted); background: white; }
+  .ssync-reject-btn:hover, .ssync-reject-btn.active { background: var(--warm-mid); color: var(--slate); border-color: var(--slate); }
+
+  .ssync-footer {
+    padding: 16px 26px; border-top: 1px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--parchment); border-radius: 0 0 16px 16px;
+  }
+  .ssync-summary { font-size: 12px; color: var(--muted); font-family:'DM Mono',monospace; }
+  .ssync-summary strong { color: var(--ink); }
+  .ssync-footer-btns { display: flex; gap: 8px; }
+  .ssync-apply-btn {
+    padding: 10px 22px; border-radius: 8px; border: none;
+    background: var(--accent); color: white; font-family:'DM Sans','Noto Sans KR',sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s;
+  }
+  .ssync-apply-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .ssync-apply-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+  .ssync-cancel-btn {
+    padding: 10px 18px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: white; color: var(--slate); font-family:'DM Sans','Noto Sans KR',sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s;
+  }
+  .ssync-cancel-btn:hover { border-color: var(--slate); }
+
+  .ssync-loading {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; padding: 60px 20px; text-align: center;
+  }
+  .ssync-loading-ring {
+    width: 40px; height: 40px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  .ssync-loading-text { font-family:'DM Mono',monospace; font-size: 12px; color: var(--muted); }
+  .ssync-loading-sub { font-size: 11px; color: var(--border); }
+
+  .ssync-empty { text-align: center; padding: 48px 20px; color: var(--muted); }
+  .ssync-empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .ssync-empty-text { font-size: 14px; font-weight: 600; color: var(--slate); margin-bottom: 6px; }
+  .ssync-empty-sub { font-size: 12px; }
+  .modal { background: var(--cream); border-radius: 12px; padding: 28px 32px; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); border: 1px solid var(--border); animation: modalIn 0.2s ease; }
+  @keyframes modalIn { from{opacity:0;transform:translateY(16px) scale(0.97)} to{opacity:1;transform:none} }
+  .modal-title { font-family: 'Playfair Display','Noto Serif KR',serif; font-size: 22px; margin-bottom: 20px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-family: 'DM Mono',monospace; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+  .form-input, .form-textarea, .form-select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 6px; background: white; color: var(--ink); font-family: 'DM Sans','Noto Sans KR',sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--accent); }
+  .form-textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+  .btn-cancel { background: var(--warm-mid); color: var(--slate); }
+  .btn-cancel:hover { background: var(--border); }
+  .btn-save { background: var(--accent); color: white; }
+  .btn-save:hover { background: var(--accent-hover); }
+
+  /* SYNC / MENTION */
+  .sync-indicator { position: fixed; bottom: 20px; right: 20px; background: var(--ink); color: var(--parchment); padding: 8px 16px; border-radius: 20px; font-family: 'DM Mono',monospace; font-size: 11px; display: flex; align-items: center; gap: 6px; z-index: 500; opacity: 0; transform: translateY(8px); transition: all 0.3s; pointer-events: none; }
+  .sync-indicator.show { opacity: 1; transform: none; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #52b788; animation: sdot 1s infinite; }
+  @keyframes sdot { 0%,100%{opacity:1} 50%{opacity:.4} }
+  #autosave-ind.show { opacity: 1 !important; transform: translateX(-50%) translateY(0) !important; }
+  #mention-popup { position: fixed; background: white; border: 1.5px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 900; min-width: 160px; overflow: hidden; display: none; }
+  .mention-item { padding: 8px 14px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--ink); font-family: 'DM Sans','Noto Sans KR',sans-serif; transition: background 0.1s; }
+  .mention-item:hover { background: var(--warm-mid); }
+  .mention-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-char { background: #2d6a4f; }
+  .dot-event { background: #0284c7; }
+
+  /* ── PASSWORD LOCK SCREEN ── */
+  #lock-screen {
+    position: fixed; inset: 0; background: var(--ink);
+    z-index: 9999; display: flex; align-items: center; justify-content: center;
+  }
+  #lock-screen.hidden { display: none; }
+  .lock-card {
+    background: var(--cream); border-radius: 16px; padding: 44px 48px;
+    width: 420px; max-width: 95vw;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.55); border: 1px solid var(--border);
+    animation: lockIn 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes lockIn { from{opacity:0;transform:translateY(24px) scale(0.96)} to{opacity:1;transform:none} }
+  .lock-logo { font-family:'Playfair Display','Noto Serif KR',serif; font-size:28px; color:var(--ink); margin-bottom:6px; text-align:center; }
+  .lock-logo span { color:var(--accent); font-style:italic; }
+  .lock-subtitle { font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); text-align:center; margin-bottom:32px; }
+  .lock-field-label { font-family:'DM Mono',monospace; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:8px; display:block; }
+  .lock-input { width:100%; padding:12px 16px; border:2px solid var(--border); border-radius:8px; background:white; color:var(--ink); font-family:'DM Sans','Noto Sans KR',sans-serif; font-size:16px; outline:none; transition:border-color 0.15s; margin-bottom:8px; }
+  .lock-input:focus { border-color:var(--accent); }
+  .lock-input.error { border-color:#ef4444; animation:shake 0.35s ease; }
+  @keyframes shake { 0%,100%{transform:none} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+  .lock-error { font-family:'DM Sans',sans-serif; font-size:12px; color:#ef4444; min-height:18px; margin-bottom:14px; text-align:center; }
+  .lock-btn { width:100%; padding:13px; border-radius:8px; border:none; background:var(--accent); color:white; font-family:'DM Sans','Noto Sans KR',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:all 0.15s; margin-bottom:12px; }
+  .lock-btn:hover { background:var(--accent-hover); transform:translateY(-1px); }
+  .lock-btn-ghost { width:100%; padding:10px; border-radius:8px; border:1.5px solid var(--border); background:transparent; color:var(--muted); font-family:'DM Sans','Noto Sans KR',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.15s; }
+  .lock-btn-ghost:hover { border-color:var(--slate); color:var(--slate); }
+  .lock-hint { text-align:center; margin-top:18px; font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.05em; }
+  .lock-divider { display:flex; align-items:center; gap:12px; margin:16px 0; color:var(--muted); font-family:'DM Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.1em; }
+  .lock-divider::before,.lock-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .strength-bar { height:3px; border-radius:2px; background:var(--border); margin-bottom:14px; overflow:hidden; }
+  .strength-fill { height:100%; border-radius:2px; transition:width 0.3s,background 0.3s; width:0; }
+
+  /* Lock button in header */
+  .btn-lock { background:transparent; border:1px solid rgba(247,243,236,0.2); color:rgba(247,243,236,0.55); display:flex; align-items:center; gap:5px; transition:all 0.2s; }
+  .btn-lock:hover { color:var(--parchment); border-color:rgba(247,243,236,0.4); background:rgba(247,243,236,0.08); }
+  .btn-lock.protected { color:#4ade80; border-color:rgba(74,222,128,0.5); }
+  .btn-lock.protected:hover { background:rgba(74,222,128,0.08); }
+
+  /* PW settings modal */
+  .pw-status { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--slate); margin-bottom:14px; }
+  .pw-dot { width:8px; height:8px; border-radius:50%; background:#d1d5db; flex-shrink:0; }
+  .pw-dot.on { background:#4ade80; }
+  .btn-danger { background:#fef2f2; color:#ef4444; border:1.5px solid #fecaca; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer; transition:all 0.15s; }
+  .btn-danger:hover { background:#ef4444; color:white; }
+  .pw-section { margin-bottom:18px; padding-bottom:18px; border-bottom:1px solid var(--border); }
+  .pw-section:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+  .pw-section-title { font-family:'DM Mono',monospace; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin-bottom:10px; }
+
+  /* ── IMAGE GENERATION MODAL ── */
+  /* ── IMAGE UPLOAD ── */
+  .img-modal-overlay {
+    position:fixed; inset:0; background:rgba(26,20,16,0.65);
+    z-index:2000; display:none; align-items:center; justify-content:center;
+    backdrop-filter:blur(4px);
+  }
+  .img-modal-overlay.open { display:flex; }
+  .img-modal {
+    background:var(--cream); border-radius:16px; width:480px; max-width:96vw;
+    overflow:hidden; display:flex; flex-direction:column;
+    box-shadow:0 32px 80px rgba(0,0,0,0.35); border:1px solid var(--border);
+    animation:modalIn 0.25s ease;
+  }
+  .img-modal-header {
+    padding:16px 22px; background:var(--ink); color:var(--parchment);
+    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    border-bottom:2px solid var(--accent);
+  }
+  .img-modal-title { font-family:'Playfair Display','Noto Serif KR',serif; font-size:17px; display:flex; align-items:center; gap:8px; }
+  .img-modal-close { background:rgba(255,255,255,0.12); border:none; color:var(--parchment); width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+  .img-modal-close:hover { background:rgba(255,255,255,0.25); }
+  .img-modal-body { padding:24px; display:flex; flex-direction:column; gap:18px; }
+
+  /* Drop zone */
+  .img-dropzone {
+    border:2px dashed var(--border); border-radius:12px; padding:36px 20px;
+    text-align:center; cursor:pointer; transition:all .2s; background:white;
+    position:relative;
+  }
+  .img-dropzone:hover, .img-dropzone.drag-over { border-color:var(--accent); background:var(--accent-soft); }
+  .img-dropzone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .img-dropzone-icon { font-size:36px; margin-bottom:10px; }
+  .img-dropzone-text { font-size:14px; font-weight:600; color:var(--slate); margin-bottom:4px; }
+  .img-dropzone-sub { font-size:12px; color:var(--muted); font-family:'DM Mono',monospace; }
+
+  /* Preview */
+  .img-preview-wrap {
+    border-radius:10px; overflow:hidden; background:var(--warm-mid);
+    display:none; flex-direction:column; gap:10px;
+  }
+  .img-preview-wrap.show { display:flex; }
+  .img-preview-wrap img { width:100%; max-height:280px; object-fit:contain; display:block; background:#1a1410; }
+  .img-preview-actions { display:flex; gap:8px; padding:0 2px 2px; }
+  .img-action-btn { flex:1; padding:9px; border-radius:8px; border:1.5px solid var(--border); background:white; font-family:'DM Sans','Noto Sans KR',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; color:var(--slate); display:flex; align-items:center; justify-content:center; gap:5px; }
+  .img-action-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+  .img-action-btn.primary { background:var(--ink); color:var(--parchment); border-color:var(--ink); }
+  .img-action-btn.primary:hover { background:#2d2520; }
+  .img-action-btn.success { background:#16a34a; color:white; border-color:#16a34a; }
+
+  /* Card thumbnail */
+  .card-img-thumb { width:100%; border-radius:6px; margin-top:8px; object-fit:cover; max-height:110px; display:block; cursor:pointer; transition:opacity .15s; }
+  .card-img-thumb:hover { opacity:.85; }
+  .card-img-btn { background:none; border:1px dashed var(--border); border-radius:6px; width:100%; margin-top:8px; padding:6px; cursor:pointer; font-size:11px; color:var(--muted); font-family:'DM Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:4px; transition:all .15s; }
+  .card-img-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+
+  /* ── DOC HIGHLIGHT ── */
+  .doc-editor-el mark.story-highlight {
+    background: linear-gradient(120deg, #d8f3dc 0%, #b7e4c7 100%);
+    color: inherit; border-radius: 3px; padding: 1px 0;
+    box-shadow: 0 0 0 2px #52b788;
+    animation: highlightPulse 1.8s ease-out forwards;
+  }
+  @keyframes highlightPulse {
+    0%  { box-shadow: 0 0 0 2px #52b788, 0 0 16px 4px rgba(82,183,136,.4); }
+    60% { box-shadow: 0 0 0 2px #52b788, 0 0 8px 2px rgba(82,183,136,.2); }
+    100%{ box-shadow: 0 0 0 2px #74c69d80; }
+  }
+
+  /* ── SELECTION TOOLBAR ── */
+  #sel-toolbar {
+    position: fixed; z-index: 3000; display: none;
+    background: var(--ink); border-radius: 8px; padding: 5px 6px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    display: none; gap: 2px; align-items: center;
+    animation: fadeInUp .15s ease;
+    pointer-events: auto;
+  }
+  #sel-toolbar.show { display: flex; }
+  @keyframes fadeInUp {
+    from { opacity:0; transform:translateY(4px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .sel-tb-btn {
+    padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer;
+    font-family:'DM Sans','Noto Sans KR',sans-serif; font-size:12px; font-weight:600;
+    display: flex; align-items: center; gap: 5px; white-space: nowrap; transition: background .12s;
+  }
+  .sel-tb-add { background: var(--accent); color: white; }
+  .sel-tb-add:hover { background: var(--accent-hover); }
+  .sel-tb-add.loading { opacity:.7; cursor:wait; }
+  .sel-tb-sep { width:1px; height:20px; background:rgba(255,255,255,.15); margin:0 2px; }
+  .sel-tb-dismiss { background:rgba(255,255,255,.08); color:rgba(255,255,255,.6); font-size:11px; padding:4px 7px; }
+  .sel-tb-dismiss:hover { background:rgba(255,255,255,.16); color:white; }
+
+  /* ── HOME / PROJECTS SCREEN ── */
+  #home-screen {
+    display: none; position: fixed; inset: 0; z-index: 8000;
+    background: var(--cream);
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #home-screen.open { display: flex; }
+
+  .home-header {
+    background: var(--ink); padding: 0 40px; height: 64px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    border-bottom: 2px solid #52b788;
+  }
+  .home-logo { font-family:'Playfair Display',serif; font-size:26px; color:var(--parchment); }
+  .home-logo span { color:#74c69d; font-style:italic; }
+  .home-logo-sub { font-family:'DM Mono',monospace; font-size:10px; color:rgba(212,207,192,.5); letter-spacing:.12em; text-transform:uppercase; margin-top:2px; }
+
+  .home-body {
+    flex: 1; overflow-y: auto; padding: 52px 60px;
+    max-width: 960px; margin: 0 auto; width: 100%;
+  }
+  .home-section-title {
+    font-family:'DM Mono',monospace; font-size:10px; font-weight:600;
+    text-transform:uppercase; letter-spacing:.14em; color:var(--muted);
+    margin-bottom:20px; display:flex; align-items:center; gap:12px;
+  }
+  .home-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .home-new-btn {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--paper); border: 2px dashed var(--border);
+    border-radius: 14px; padding: 22px 28px; cursor: pointer;
+    transition: all .2s; margin-bottom: 32px; width: 100%;
+    text-align: left;
+  }
+  .home-new-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .home-new-icon { font-size: 32px; flex-shrink: 0; }
+  .home-new-title { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:var(--ink); }
+  .home-new-sub { font-size:12px; color:var(--muted); margin-top:3px; font-family:'DM Mono',monospace; }
+
+  .projects-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .project-card {
+    background: var(--paper); border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 22px 24px; cursor: pointer; transition: all .2s; position: relative;
+    display: flex; flex-direction: column; gap: 10px;
+    box-shadow: 0 1px 4px rgba(28,43,26,.05);
+  }
+  .project-card:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(28,43,26,.12); transform: translateY(-2px); }
+  .project-card-spine {
+    position: absolute; top: 0; left: 0; bottom: 0; width: 5px;
+    border-radius: 14px 0 0 14px; background: var(--accent);
+  }
+  .project-card-inner { padding-left: 10px; }
+  .project-emoji { font-size: 28px; margin-bottom: 4px; }
+  .project-title { font-family:'Playfair Display',serif; font-size:17px; font-weight:700; color:var(--ink); line-height:1.3; margin-bottom:2px; }
+  .project-meta { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); display:flex; flex-direction:column; gap:3px; }
+  .project-stats { display:flex; gap:12px; font-size:10px; font-family:'DM Mono',monospace; color:var(--muted); margin-top:4px; }
+  .project-stat { display:flex; align-items:center; gap:4px; }
+  .project-actions { display:flex; gap:6px; margin-top:8px; }
+  .project-open-btn {
+    flex:1; padding:8px 12px; border-radius:8px; border:1.5px solid var(--accent);
+    background: var(--accent-soft); color:var(--accent); font-size:12px; font-weight:600;
+    cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .15s; text-align:center;
+  }
+  .project-open-btn:hover { background:var(--accent); color:white; }
+  .project-del-btn {
+    padding:8px 10px; border-radius:8px; border:1.5px solid var(--border);
+    background:white; color:var(--muted); font-size:12px; cursor:pointer;
+    transition:all .15s;
+  }
+  .project-del-btn:hover { border-color:#ef4444; color:#ef4444; background:#fef2f2; }
+
+  /* New project modal */
+  .new-proj-overlay {
+    position:fixed; inset:0; background:rgba(28,43,26,0.5); z-index:9000;
+    display:none; align-items:center; justify-content:center; backdrop-filter:blur(3px);
+  }
+  .new-proj-overlay.open { display:flex; }
+  .new-proj-modal {
+    background:var(--cream); border-radius:16px; padding:36px 40px;
+    width:480px; max-width:96vw; box-shadow:0 24px 64px rgba(0,0,0,0.25);
+    border:1px solid var(--border); animation:modalIn .25s ease;
+  }
+  .new-proj-title { font-family:'Playfair Display',serif; font-size:24px; margin-bottom:6px; color:var(--ink); }
+  .new-proj-sub { font-size:13px; color:var(--muted); margin-bottom:28px; font-family:'DM Mono',monospace; }
+  .emoji-picker { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .emoji-opt { width:36px; height:36px; border-radius:8px; border:1.5px solid var(--border); background:white; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+  .emoji-opt:hover, .emoji-opt.selected { border-color:var(--accent); background:var(--accent-soft); }
+  .structure-arc {
+    margin: 0 0 28px 0; background: white; border: 1.5px solid var(--border);
+    border-radius: 14px; overflow: hidden; flex-shrink: 0;
+  }
+  .structure-arc-header {
+    padding: 10px 16px; background: var(--parchment); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .structure-arc-title { font-family:'DM Mono',monospace; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); display:flex; align-items:center; gap:6px; }
+  .structure-arc-toggle { font-size:11px; color:var(--accent); cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; font-weight:600; padding:0; }
+  .structure-arc-body { padding: 16px 16px 20px; }
+
+  .arc-track {
+    display: flex; gap: 0; position: relative; margin-bottom: 10px;
+  }
+  .arc-track::before {
+    content: ''; position: absolute; bottom: 28px; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #d1d5db 0%, #52b788 30%, #2d6a4f 50%, #5c6bc0 65%, #0284c7 80%, #16a34a 100%);
+    border-radius: 2px; z-index: 0;
+  }
+  .arc-beat {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 6px; position: relative; z-index: 1;
+  }
+  .arc-beat-dot {
+    width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid white;
+    box-shadow: 0 0 0 2px var(--border); margin-bottom: 2px; flex-shrink: 0;
+    transition: transform .2s; cursor: default;
+  }
+  .arc-beat:hover .arc-beat-dot { transform: scale(1.3); }
+  .arc-beat-label { font-family:'DM Mono',monospace; font-size:9px; text-align:center; color:var(--muted); line-height:1.3; font-weight:500; }
+  .arc-beat-events { display:flex; flex-direction:column; gap:3px; max-width:90px; }
+  .arc-beat-event-chip {
+    background: var(--accent-soft); color: var(--accent); border-radius: 10px;
+    padding: 2px 6px; font-size:9px; font-family:'DM Mono',monospace; text-align:center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 84px;
+    cursor: pointer; transition: background .15s;
+  }
+  .arc-beat-event-chip:hover { background: var(--accent); color: white; }
+  .arc-beat-empty { font-size:9px; color:var(--border); font-style:italic; font-family:'DM Mono',monospace; text-align:center; }
+
+  /* ── STRUCTURE ADVISOR PANEL ── */
+  .struct-panel {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 340px;
+    background: white; border-left: 1.5px solid var(--border);
+    display: flex; flex-direction: column; z-index: 200;
+    transform: translateX(100%); transition: transform .3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: -4px 0 24px rgba(26,20,16,0.1);
+  }
+  .struct-panel.open { transform: translateX(0); }
+  .struct-panel-header {
+    padding: 14px 16px; background: var(--ink); color: var(--parchment);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    border-bottom: 2px solid var(--gold);
+  }
+  .struct-panel-title { font-family:'Playfair Display','Noto Serif KR',serif; font-size:15px; display:flex; align-items:center; gap:8px; }
+  .struct-panel-close { background:rgba(255,255,255,0.12); border:none; color:var(--parchment); width:24px; height:24px; border-radius:50%; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+  .struct-panel-close:hover { background:rgba(255,255,255,0.25); }
+  .struct-panel-body { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .struct-panel-body::-webkit-scrollbar { width:4px; }
+  .struct-panel-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  /* suggestion cards */
+  .struct-suggestion {
+    border-radius: 10px; border: 1.5px solid var(--border); padding: 12px 14px;
+    background: var(--cream); position: relative; transition: border-color .2s;
+  }
+  .struct-suggestion:hover { border-color: var(--gold); }
+  .struct-suggestion.dismissed { display: none; }
+  .struct-sug-header { display:flex; align-items:flex-start; gap:8px; margin-bottom:6px; }
+  .struct-sug-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+  .struct-sug-meta { flex:1; min-width:0; }
+  .struct-sug-category { font-family:'DM Mono',monospace; font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:2px; }
+  .struct-sug-title { font-size:13px; font-weight:700; color:var(--ink); line-height:1.3; }
+  .struct-sug-dismiss { background:none; border:none; color:var(--border); cursor:pointer; font-size:14px; padding:0; flex-shrink:0; transition:color .15s; margin-top:-2px; }
+  .struct-sug-dismiss:hover { color:var(--muted); }
+  .struct-sug-body { font-size:12px; color:var(--slate); line-height:1.6; margin-bottom:8px; }
+  .struct-sug-priority { display:inline-flex; align-items:center; gap:4px; font-family:'DM Mono',monospace; font-size:9px; font-weight:600; padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:.05em; }
+  .priority-high { background:#fef2f2; color:#ef4444; }
+  .priority-medium { background:#fef9c3; color:#6b7280; }
+  .priority-low { background:#f0fdf4; color:#16a34a; }
+
+  .struct-panel-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:48px 20px; text-align:center; }
+  .struct-loading-ring { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; }
+  .struct-loading-text { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
+
+  .struct-panel-footer { padding:12px 16px; border-top:1px solid var(--border); flex-shrink:0; background:var(--parchment); }
+  .struct-refresh-btn { width:100%; padding:9px; border-radius:8px; border:1.5px solid var(--border); background:white; font-family:'DM Sans','Noto Sans KR',sans-serif; font-size:12px; font-weight:600; cursor:pointer; color:var(--slate); display:flex; align-items:center; justify-content:center; gap:6px; transition:all .15s; }
+  .struct-refresh-btn:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-light); }
+
+  /* advisor button in toolbar */
+  .btn-advisor { padding:6px 12px; border-radius:6px; border:1.5px solid #2d6a4f; background:#d8f3dc; color:#2d6a4f; font-family:'DM Sans','Noto Sans KR',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:5px; }
+  .btn-advisor:hover { background:#2d6a4f; color:white; border-color:#2d6a4f; }
+  .btn-advisor.active { background:#2d6a4f; color:white; border-color:#2d6a4f; }
+  /* ── SAVE FILE DROPDOWN ── */
+  .save-dropdown-wrap { position: relative; }
+  .save-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--cream); border: 1.5px solid var(--border);
+    border-radius: 12px; width: 260px; box-shadow: var(--shadow-lg);
+    z-index: 2000; display: none; overflow: hidden;
+    animation: dropIn .18s cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes dropIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+  .save-dropdown.open { display: block; }
+  .save-dropdown-title {
+    font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .12em; color: var(--muted);
+    padding: 10px 14px 6px;
+  }
+  .save-dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+  .save-option {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 10px 14px; border: none; background: transparent;
+    cursor: pointer; text-align: left; transition: background .12s;
+  }
+  .save-option:hover { background: var(--accent-soft); }
+  .save-option-icon { font-size: 18px; flex-shrink: 0; width: 22px; text-align: center; }
+  .save-option-label { font-size: 13px; font-weight: 600; color: var(--ink); font-family: 'DM Sans', sans-serif; }
+  .save-option-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+  .save-option-drive:hover { background: #e8f0fe; }
+  .save-option-badge { margin-left: auto; font-size: 12px; color: #1a73e8; font-weight: 700; }
+  .gdrive-signed-in .save-option-sub { color: #1a73e8; }
+
+</style>
+</head>
+<body class="lang-en">
+
+<!-- ── HOME / PROJECTS SCREEN ── -->
+<div id="home-screen">
+  <div class="home-header">
+    <div>
+      <div class="home-logo">Story<span>loom</span></div>
+      <div class="home-logo-sub" id="home-tagline">Your creative writing workspace</div>
+    </div>
+  </div>
+  <div class="home-body">
+    <button class="home-new-btn" onclick="openNewProjectModal()">
+      <div class="home-new-icon">📖</div>
+      <div>
+        <div class="home-new-title" id="home-new-title">Start a New Project</div>
+        <div class="home-new-sub" id="home-new-sub">Begin a new novel, story, or writing project</div>
+      </div>
+    </button>
+    <div class="home-section-title" id="home-proj-label">Your Projects</div>
+    <div class="projects-grid" id="projects-grid"></div>
+  </div>
+</div>
+
+<!-- ── NEW PROJECT MODAL ── -->
+<div class="new-proj-overlay" id="new-proj-overlay" onclick="closeNewProjOverlay(event)">
+  <div class="new-proj-modal">
+    <div class="new-proj-title" id="npj-title">New Project</div>
+    <div class="new-proj-sub" id="npj-sub">Give your story a name to get started</div>
+    <div class="form-group">
+      <label class="form-label" id="npj-emoji-label">Choose an icon</label>
+      <div class="emoji-picker" id="npj-emoji-picker">
+        <button class="emoji-opt selected" data-emoji="📖" onclick="selectProjEmoji(this)">📖</button>
+        <button class="emoji-opt" data-emoji="✍️" onclick="selectProjEmoji(this)">✍️</button>
+        <button class="emoji-opt" data-emoji="📚" onclick="selectProjEmoji(this)">📚</button>
+        <button class="emoji-opt" data-emoji="🌿" onclick="selectProjEmoji(this)">🌿</button>
+        <button class="emoji-opt" data-emoji="🗺️" onclick="selectProjEmoji(this)">🗺️</button>
+        <button class="emoji-opt" data-emoji="🌙" onclick="selectProjEmoji(this)">🌙</button>
+        <button class="emoji-opt" data-emoji="⚔️" onclick="selectProjEmoji(this)">⚔️</button>
+        <button class="emoji-opt" data-emoji="💌" onclick="selectProjEmoji(this)">💌</button>
+        <button class="emoji-opt" data-emoji="🔮" onclick="selectProjEmoji(this)">🔮</button>
+        <button class="emoji-opt" data-emoji="🏔️" onclick="selectProjEmoji(this)">🏔️</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="npj-name-label">Project Title</label>
+      <input class="form-input" id="npj-name-input" placeholder="Untitled Novel" autocomplete="off">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeNewProjModal()">Cancel</button>
+      <button class="btn btn-save" onclick="createNewProject()" id="npj-create-btn">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOCK SCREEN ── -->
+<div id="lock-screen">
+  <div class="lock-card" id="lock-card">
+    <div class="lock-logo">Story<span>loom</span></div>
+    <div class="lock-subtitle" id="lock-subtitle">Your private novel workspace</div>
+    <!-- Enter password view -->
+    <div id="lock-enter-view">
+      <label class="lock-field-label" id="lock-pw-label">Password</label>
+      <input class="lock-input" type="password" id="lock-pw-input" placeholder="Enter your password" autocomplete="current-password">
+      <div class="lock-error" id="lock-error"></div>
+      <button class="lock-btn" id="lock-submit-btn" onclick="submitLockPassword()">Unlock</button>
+      <div class="lock-divider">or</div>
+      <button class="lock-btn-ghost" onclick="skipPassword()">Continue without password</button>
+      <div class="lock-hint" id="lock-hint-text">Password is stored only on this device</div>
+    </div>
+    <!-- Set password view (first time) -->
+    <div id="lock-setup-view" style="display:none">
+      <label class="lock-field-label" id="lock-new-label">Create a password</label>
+      <input class="lock-input" type="password" id="lock-new-input" placeholder="Choose a password" oninput="updateStrength()" autocomplete="new-password">
+      <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+      <label class="lock-field-label" id="lock-confirm-label">Confirm password</label>
+      <input class="lock-input" type="password" id="lock-confirm-input" placeholder="Repeat password" autocomplete="new-password">
+      <div class="lock-error" id="lock-setup-error"></div>
+      <button class="lock-btn" onclick="submitSetupPassword()">Set Password & Enter</button>
+      <div class="lock-divider">or</div>
+      <button class="lock-btn-ghost" onclick="skipPassword()">Skip — no password</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── IMAGE GENERATION MODAL ── -->
+<!-- ── IMAGE UPLOAD MODAL ── -->
+<div class="img-modal-overlay" id="img-modal-overlay" onclick="closeImgModalOverlay(event)">
+  <div class="img-modal">
+    <div class="img-modal-header">
+      <div class="img-modal-title">🖼️ <span id="img-modal-title-text">Add Image</span></div>
+      <button class="img-modal-close" onclick="closeImgModal()">✕</button>
+    </div>
+    <div class="img-modal-body">
+
+      <!-- Drop zone / file picker -->
+      <div class="img-dropzone" id="img-dropzone"
+        ondragover="imgDragOver(event)" ondragleave="imgDragLeave(event)" ondrop="imgDrop(event)">
+        <input type="file" id="img-file-input" accept="image/*" onchange="imgFileChosen(event)">
+        <div class="img-dropzone-icon">📁</div>
+        <div class="img-dropzone-text" id="img-dz-text">Click to choose an image</div>
+        <div class="img-dropzone-sub" id="img-dz-sub">or drag and drop · JPG, PNG, GIF, WEBP</div>
+      </div>
+
+      <!-- Preview + actions (hidden until image chosen) -->
+      <div class="img-preview-wrap" id="img-preview-wrap">
+        <img id="img-preview" src="" alt="Preview">
+        <div class="img-preview-actions">
+          <button class="img-action-btn" onclick="imgClear()" id="img-clear-btn">✕ Remove</button>
+          <button class="img-action-btn primary" id="img-save-btn" onclick="imgSaveToCard()">💾 Save to Card</button>
+        </div>
+        <div id="img-saved-banner" style="display:none;background:#ecfdf5;border:1.5px solid #bbf7d0;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:600;color:#16a34a;text-align:center;font-family:'DM Sans',sans-serif"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── SMART SYNC MODAL ── -->
+<div class="ssync-overlay" id="ssync-overlay">
+  <div class="ssync-modal">
+    <div class="ssync-header">
+      <div>
+        <div class="ssync-title" id="ssync-title">⟳ Smart Sync</div>
+        <div class="ssync-subtitle" id="ssync-subtitle">Analysing your writing and story board…</div>
+      </div>
+      <button class="ssync-close" onclick="closeSyncModal()">✕</button>
+    </div>
+    <div class="ssync-body" id="ssync-body">
+      <div class="ssync-loading">
+        <div class="ssync-loading-ring"></div>
+        <div class="ssync-loading-text" id="ssync-loading-text">Reading your document…</div>
+        <div class="ssync-loading-sub" id="ssync-loading-sub">This takes a few seconds</div>
+      </div>
+    </div>
+    <div class="ssync-footer" id="ssync-footer" style="display:none">
+      <div class="ssync-summary" id="ssync-summary"></div>
+      <div class="ssync-footer-btns">
+        <button class="ssync-cancel-btn" onclick="closeSyncModal()" id="ssync-cancel-btn">Cancel</button>
+        <button class="ssync-apply-btn" onclick="applyApprovedChanges()" id="ssync-apply-btn">Apply Selected</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PASSWORD SETTINGS MODAL ── -->
+<div class="modal-overlay" id="pw-modal-overlay" onclick="closePwModalOverlay(event)">
+  <div class="modal" style="width:400px">
+    <div class="modal-title" id="pw-modal-title">🔒 Password Protection</div>
+    <div id="pw-modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closePwModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div>
+    <div class="logo">Story<span>loom</span></div>
+    <div id="active-proj-name" style="font-family:'DM Mono',monospace;font-size:9px;color:rgba(212,207,192,.45);letter-spacing:.1em;text-transform:uppercase;margin-top:1px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-ghost" id="btn-api-key" onclick="openApiKeyModal()" title="No API key — AI features disabled" style="display:flex;align-items:center;gap:6px;opacity:.8">
+      <span id="api-key-indicator" style="width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0;display:inline-block"></span>
+      <span>API Key</span>
+    </button>
+    <button class="btn btn-ghost" id="btn-home" onclick="showHome()" title="All projects" style="display:flex;align-items:center;gap:5px;opacity:.75">
+      <span>⌂</span><span id="btn-home-label">Projects</span>
+    </button>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')" id="lang-en">EN</button>
+      <button class="lang-btn" onclick="setLang('ko')" id="lang-ko">한국어</button>
+    </div>
+    <button class="btn btn-lock" id="btn-lock" onclick="openPwModal()" title="Password settings">
+      <span id="lock-icon">🔓</span>
+      <span id="btn-lock-label">Lock</span>
+    </button>
+    <button class="btn btn-sync" id="btn-sync" onclick="manualSync()" title="Sync document and story board">
+      <span class="sync-icon" id="sync-icon">⟳</span>
+      <span id="btn-sync-label">Sync</span>
+      <div class="sync-badge"></div>
+    </button>
+    <div class="save-dropdown-wrap" id="save-dropdown-wrap">
+      <button class="btn btn-ghost" id="btn-save-file" onclick="toggleSaveDropdown()" title="Save to file or Google Drive">
+        ↓ <span id="btn-save-file-label">Save File</span>
+      </button>
+      <div class="save-dropdown" id="save-dropdown">
+        <div class="save-dropdown-title">Save workspace</div>
+        <button class="save-option" onclick="saveAsFile('app')" style="background:var(--accent-soft)">
+          <span class="save-option-icon">💾</span>
+          <div><div class="save-option-label" style="color:var(--accent)">Save App (.html)</div><div class="save-option-sub">All projects + story board — opens anywhere</div></div>
+        </button>
+        <div class="save-dropdown-divider"></div>
+        <div class="save-dropdown-title" id="sdrop-title">Export document only</div>
+        <button class="save-option" onclick="saveAsFile('txt')">
+          <span class="save-option-icon">📄</span>
+          <div><div class="save-option-label" id="sdrop-txt">Plain Text (.txt)</div><div class="save-option-sub" id="sdrop-txt-sub">Simple text, works everywhere</div></div>
+        </button>
+        <button class="save-option" onclick="saveAsFile('md')">
+          <span class="save-option-icon">✦</span>
+          <div><div class="save-option-label" id="sdrop-md">Markdown (.md)</div><div class="save-option-sub" id="sdrop-md-sub">Formatted text with headings</div></div>
+        </button>
+        <button class="save-option" onclick="saveAsFile('html')">
+          <span class="save-option-icon">🌐</span>
+          <div><div class="save-option-label" id="sdrop-html">Rich HTML (.html)</div><div class="save-option-sub" id="sdrop-html-sub">Styled document, no story board</div></div>
+        </button>
+        <div class="save-dropdown-divider"></div>
+        <div class="save-dropdown-title" id="sdrop-cloud-title">Save to cloud</div>
+        <button class="save-option save-option-drive" onclick="saveToGoogleDrive()" id="gdrive-btn">
+          <span class="save-option-icon">
+            <svg width="16" height="16" viewBox="0 0 87.3 78" style="vertical-align:middle"><path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 49.5c-.8 1.4-1.2 2.95-1.2 4.5h27.45z" fill="#00ac47"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.85l5.85 11.2z" fill="#ea4335"/><path d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="M59.85 53H27.45L13.7 76.8c1.35.8 2.9 1.2 4.5 1.2h50.9c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.2 28h27.4c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+          </span>
+          <div>
+            <div class="save-option-label" id="sdrop-drive">Google Drive</div>
+            <div class="save-option-sub" id="gdrive-status">Sign in to save to Drive</div>
+          </div>
+          <span class="save-option-badge" id="gdrive-badge" style="display:none">✓</span>
+        </button>
+      </div>
+    </div>
+    <button class="btn btn-accent" id="btn-save-hdr" onclick="saveAll()">Save</button>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <div class="tab active" data-panel="split" onclick="switchPanel('split')">⊞ Split View</div>
+  <div class="tab" data-panel="doc" onclick="switchPanel('doc')">✍ Document</div>
+  <div class="tab" data-panel="board" onclick="switchPanel('board')">⬚ Story Board</div>
+</div>
+
+<div class="workspace">
+
+  <!-- SPLIT -->
+  <div id="panel-split" class="panel active">
+    <div class="doc-panel" id="doc-pane" style="flex:1">
+      <div class="doc-toolbar" id="toolbar-split"></div>
+      <div class="doc-body">
+        <div class="doc-editor-wrap">
+          <div id="doc-editor" class="doc-editor-el" contenteditable="true" spellcheck="true"></div>
+        </div>
+        <div class="ai-sidebar" id="ai-sidebar">
+          <div class="ai-sidebar-inner">
+            <div class="ai-sidebar-header">
+              <div class="ai-sidebar-title">✦ <span id="ai-title-1">AI Writing Refiner</span></div>
+              <button class="ai-close-btn" onclick="closeAiSidebar('ai-sidebar')">✕</button>
+            </div>
+            <div class="ai-options">
+              <div class="ai-option-label" id="ai-mode-label-1">Refinement Mode</div>
+              <div class="ai-mode-grid" id="ai-mode-grid-1">
+                <button class="ai-mode-btn selected" data-mode="polish" onclick="selectMode(this,'1')"><span class="mode-icon">✨</span><span class="mode-label">Polish</span></button>
+                <button class="ai-mode-btn" data-mode="vivid" onclick="selectMode(this,'1')"><span class="mode-icon">🎨</span><span class="mode-label">Vivid</span></button>
+                <button class="ai-mode-btn" data-mode="concise" onclick="selectMode(this,'1')"><span class="mode-icon">✂️</span><span class="mode-label">Concise</span></button>
+                <button class="ai-mode-btn" data-mode="dramatic" onclick="selectMode(this,'1')"><span class="mode-icon">🎭</span><span class="mode-label">Dramatic</span></button>
+                <button class="ai-mode-btn" data-mode="poetic" onclick="selectMode(this,'1')"><span class="mode-icon">🌸</span><span class="mode-label">Poetic</span></button>
+                <button class="ai-mode-btn" data-mode="dialogue" onclick="selectMode(this,'1')"><span class="mode-icon">💬</span><span class="mode-label">Dialogue</span></button>
+              </div>
+              <div class="ai-option-label" id="ai-scope-label-1">Scope</div>
+              <div class="ai-scope-row" id="ai-scope-row-1">
+                <button class="ai-scope-btn selected" data-scope="selection" onclick="selectScope(this,'1')">Selection</button>
+                <button class="ai-scope-btn" data-scope="paragraph" onclick="selectScope(this,'1')">Paragraph</button>
+                <button class="ai-scope-btn" data-scope="all" onclick="selectScope(this,'1')">All</button>
+              </div>
+              <button class="ai-run-btn" id="ai-run-1" onclick="runAiRefine('1')">
+                <span>✦</span><span id="ai-run-label-1">Refine Writing</span>
+              </button>
+            </div>
+            <div class="ai-result-area" id="ai-result-1">
+              <div class="ai-empty-state"><div class="ai-icon">✦</div><div id="ai-empty-1">Select a mode and scope, then click <strong>Refine Writing</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="word-count">
+        <span id="wc-words">0 words</span>
+        <span id="wc-chars">0 characters</span>
+        <span id="wc-lines">0 lines</span>
+        <span class="lang-indicator" id="lang-ind-1">English</span>
+      </div>
+    </div>
+    <div class="divider" id="divider"></div>
+    <div class="board-panel" id="board-pane" style="flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column">
+      <div class="board-toolbar" id="board-toolbar-split"></div>
+      <div class="board-sections" style="flex:1;overflow-y:auto;padding:20px 24px">
+        <div id="arc-template-split"></div>
+        <div>
+          <div class="board-section-title" id="sec-chars">Characters</div>
+          <div class="cards-row" id="chars-row" ondragover="onDragOver(event,'chars-row')" ondrop="onDrop(event,'chars-row')"></div>
+        </div>
+        <div>
+          <div class="board-section-title" id="sec-events">Story Timeline</div>
+          <div class="cards-row" id="events-row" ondragover="onDragOver(event,'events-row')" ondrop="onDrop(event,'events-row')"></div>
+        </div>
+      </div>
+      <!-- Structure Advisor Panel -->
+      <div class="struct-panel" id="struct-panel-split">
+        <div class="struct-panel-header">
+          <div class="struct-panel-title">📐 <span id="struct-title-split">Story Advisor</span></div>
+          <button class="struct-panel-close" onclick="closeAdvisor('split')">✕</button>
+        </div>
+        <div class="struct-panel-body" id="struct-body-split">
+          <div class="struct-panel-loading"><div class="struct-loading-ring"></div><div class="struct-loading-text">Analysing your story…</div></div>
+        </div>
+        <div class="struct-panel-footer">
+          <button class="struct-refresh-btn" onclick="runAdvisor('split')">↺ <span id="struct-refresh-label-split">Re-analyse</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOC ONLY -->
+  <div id="panel-doc" class="panel">
+    <div class="doc-panel" style="flex:1">
+      <div class="doc-toolbar" id="toolbar-doc"></div>
+      <div class="doc-body">
+        <div class="doc-editor-wrap" style="padding:64px 100px">
+          <div id="doc-editor-2" class="doc-editor-el" contenteditable="true" spellcheck="true" style="max-width:700px;margin:0 auto;"></div>
+        </div>
+        <div class="ai-sidebar" id="ai-sidebar-2">
+          <div class="ai-sidebar-inner">
+            <div class="ai-sidebar-header">
+              <div class="ai-sidebar-title">✦ <span id="ai-title-2">AI Writing Refiner</span></div>
+              <button class="ai-close-btn" onclick="closeAiSidebar('ai-sidebar-2')">✕</button>
+            </div>
+            <div class="ai-options">
+              <div class="ai-option-label" id="ai-mode-label-2">Refinement Mode</div>
+              <div class="ai-mode-grid" id="ai-mode-grid-2">
+                <button class="ai-mode-btn selected" data-mode="polish" onclick="selectMode(this,'2')"><span class="mode-icon">✨</span><span class="mode-label">Polish</span></button>
+                <button class="ai-mode-btn" data-mode="vivid" onclick="selectMode(this,'2')"><span class="mode-icon">🎨</span><span class="mode-label">Vivid</span></button>
+                <button class="ai-mode-btn" data-mode="concise" onclick="selectMode(this,'2')"><span class="mode-icon">✂️</span><span class="mode-label">Concise</span></button>
+                <button class="ai-mode-btn" data-mode="dramatic" onclick="selectMode(this,'2')"><span class="mode-icon">🎭</span><span class="mode-label">Dramatic</span></button>
+                <button class="ai-mode-btn" data-mode="poetic" onclick="selectMode(this,'2')"><span class="mode-icon">🌸</span><span class="mode-label">Poetic</span></button>
+                <button class="ai-mode-btn" data-mode="dialogue" onclick="selectMode(this,'2')"><span class="mode-icon">💬</span><span class="mode-label">Dialogue</span></button>
+              </div>
+              <div class="ai-option-label" id="ai-scope-label-2">Scope</div>
+              <div class="ai-scope-row" id="ai-scope-row-2">
+                <button class="ai-scope-btn selected" data-scope="selection" onclick="selectScope(this,'2')">Selection</button>
+                <button class="ai-scope-btn" data-scope="paragraph" onclick="selectScope(this,'2')">Paragraph</button>
+                <button class="ai-scope-btn" data-scope="all" onclick="selectScope(this,'2')">All</button>
+              </div>
+              <button class="ai-run-btn" id="ai-run-2" onclick="runAiRefine('2')">
+                <span>✦</span><span id="ai-run-label-2">Refine Writing</span>
+              </button>
+            </div>
+            <div class="ai-result-area" id="ai-result-2">
+              <div class="ai-empty-state"><div class="ai-icon">✦</div><div id="ai-empty-2">Select a mode and scope, then click <strong>Refine Writing</strong>.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="word-count">
+        <span id="wc-words-2">0 words</span>
+        <span id="wc-chars-2">0 chars</span>
+        <span class="lang-indicator" id="lang-ind-2">English</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOARD ONLY -->
+  <div id="panel-board" class="panel">
+    <div class="board-panel" style="flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column">
+      <div class="board-toolbar" id="board-toolbar-solo"></div>
+      <div class="board-sections" id="board-solo" style="padding:28px 40px;flex:1;overflow-y:auto">
+        <div id="arc-template-solo"></div>
+      </div>
+      <!-- Structure Advisor Panel -->
+      <div class="struct-panel" id="struct-panel-solo">
+        <div class="struct-panel-header">
+          <div class="struct-panel-title">📐 <span id="struct-title-solo">Story Advisor</span></div>
+          <button class="struct-panel-close" onclick="closeAdvisor('solo')">✕</button>
+        </div>
+        <div class="struct-panel-body" id="struct-body-solo">
+          <div class="struct-panel-loading"><div class="struct-loading-ring"></div><div class="struct-loading-text">Analysing your story…</div></div>
+        </div>
+        <div class="struct-panel-footer">
+          <button class="struct-refresh-btn" onclick="runAdvisor('solo')">↺ <span id="struct-refresh-label-solo">Re-analyse</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOverlay(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" id="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-save" id="btn-save-modal" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+<div id="mention-popup"></div>
+<div class="sync-indicator" id="sync-indicator"><div class="sync-dot"></div><span id="sync-text">Synced</span></div>
+<div id="autosave-ind" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(28,43,26,0.75);color:#d8f3dc;padding:5px 14px;border-radius:20px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;opacity:0;transition:all .3s;pointer-events:none;z-index:400">✦ autosaved</div>
+
+<div id="sel-toolbar">
+  <button class="sel-tb-btn sel-tb-add" id="sel-tb-add-btn" onclick="addSelectionToBoard()">
+    <span id="sel-tb-icon">📌</span>
+    <span id="sel-tb-label">Add to Board</span>
+  </button>
+  <div class="sel-tb-sep"></div>
+  <button class="sel-tb-btn sel-tb-dismiss" onclick="hideSelToolbar()">✕</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────
+// i18n
+// ─────────────────────────────────────────────────
+let currentLang = 'en';
+const T = {
+  en: {
+    tabs: { split:'⊞ Split View', doc:'✍ Document', board:'⬚ Story Board' },
+    export:'↓ Export', save:'Save', syncBtn:'Sync', syncBtnChanges:'Sync Now',
+    addLabel:'Add:',
+    addChar:'+ Character', addMain:'+ Main Event', addMinor:'+ Minor Event', addConnect:'+ Link',
+    secChars:'Characters', secTimeline:'Story Timeline',
+    emptyChars:'No characters yet. Add one above.',
+    emptyEvents:'No events yet. Add Main, Minor, or Connecting events.',
+    aiTitle:'AI Writing Refiner', aiModeLabel:'Refinement Mode', aiScopeLabel:'Scope',
+    aiRunBtn:'Refine Writing',
+    aiEmpty:'Select a mode and scope, then click <strong>Refine Writing</strong>.',
+    aiLoading:'Refining your prose...', aiResultLabel:'Refined Version', aiAccept:'✓ Accept & Replace',
+    modes:{ polish:'Polish', vivid:'Vivid', concise:'Concise', dramatic:'Dramatic', poetic:'Poetic', dialogue:'Dialogue' },
+    scopes:{ selection:'Selection', paragraph:'Paragraph', all:'All' },
+    langInd:'English',
+    modals:{ newChar:'New Character', editChar:'Edit Character', newMain:'New Main Event', editMain:'Edit Main Event', newMinor:'New Minor Event', editMinor:'Edit Minor Event', newConnect:'New Connecting Link', editConnect:'Edit Connecting Link' },
+    fields:{ name:'Character Name *', role:'Role', desc:'Description', motiv:'Motivation / Goal', evtTitle:'Event Title *', evtDesc:'Description', chars:'Characters Involved', chapter:'Chapter / Act' },
+    roles:['Protagonist','Antagonist','Supporting','Narrator','Other'],
+    ph:{ charName:'e.g. Elena Vasquez', desc:'Appearance, personality, background...', motiv:'What drives this character?', evtTitle:'e.g. The Discovery', evtDesc:'What happens in this event?', chapter:'e.g. Chapter 3, Act I' },
+    cancel:'Cancel', saveBtn:'Save',
+    words:n=>`${n} words`, chars:n=>`${n} characters`, lines:n=>`${n} lines`,
+    syncs:{ saved:'All saved ✓', deleted:'Deleted', reordered:'Reordered', created:'Created', updated:'Updated', applied:'✓ Applied', synced:'Synced ✓' },
+    noSel:'Please select some text or place your cursor in a paragraph first.',
+    starterH1:'Chapter One', starterP:"Your story begins here. Write freely — use <strong>@</strong> to mention characters or events.",
+    mentionBtn:'@ Mention',
+    advisorBtn:'Story Advisor',
+    appliedMsg:'Applied successfully!'
+  },
+  ko: {
+    tabs:{ split:'⊞ 분할 보기', doc:'✍ 원고', board:'⬚ 스토리 보드' },
+    export:'↓ 내보내기', save:'저장', syncBtn:'동기화', syncBtnChanges:'지금 동기화',
+    addLabel:'추가:',
+    addChar:'+ 등장인물', addMain:'+ 주요 사건', addMinor:'+ 부수 사건', addConnect:'+ 연결',
+    secChars:'등장인물', secTimeline:'이야기 흐름',
+    emptyChars:'아직 등장인물이 없습니다. 위에서 추가해보세요.',
+    emptyEvents:'아직 사건이 없습니다. 주요·부수·연결 사건을 추가해보세요.',
+    aiTitle:'AI 글 다듬기', aiModeLabel:'다듬기 방식', aiScopeLabel:'범위',
+    aiRunBtn:'글 다듬기',
+    aiEmpty:'방식과 범위를 선택한 후 <strong>글 다듬기</strong>를 클릭하세요.',
+    aiLoading:'글을 다듬는 중...', aiResultLabel:'다듬어진 버전', aiAccept:'✓ 적용하기',
+    modes:{ polish:'다듬기', vivid:'생동감', concise:'간결하게', dramatic:'극적으로', poetic:'시적으로', dialogue:'대화체' },
+    scopes:{ selection:'선택 부분', paragraph:'단락', all:'전체' },
+    langInd:'한국어',
+    modals:{ newChar:'등장인물 추가', editChar:'등장인물 수정', newMain:'주요 사건 추가', editMain:'주요 사건 수정', newMinor:'부수 사건 추가', editMinor:'부수 사건 수정', newConnect:'연결 사건 추가', editConnect:'연결 사건 수정' },
+    fields:{ name:'등장인물 이름 *', role:'역할', desc:'설명', motiv:'동기 / 목표', evtTitle:'사건 제목 *', evtDesc:'설명', chars:'관련 등장인물', chapter:'챕터 / 막' },
+    roles:['주인공','악역','조연','서술자','기타'],
+    ph:{ charName:'예: 이지수', desc:'외모, 성격, 배경...', motiv:'이 인물을 움직이는 것은 무엇인가요?', evtTitle:'예: 비밀의 발견', evtDesc:'이 사건에서 무슨 일이 일어나나요?', chapter:'예: 3장, 1막' },
+    cancel:'취소', saveBtn:'저장',
+    words:n=>`${n} 단어`, chars:n=>`${n} 자`, lines:n=>`${n} 줄`,
+    syncs:{ saved:'저장 완료 ✓', deleted:'삭제됨', reordered:'순서 변경됨', created:'생성됨', updated:'수정됨', applied:'✓ 적용됨', synced:'동기화 완료 ✓' },
+    noSel:'먼저 텍스트를 선택하거나 단락에 커서를 놓아주세요.',
+    starterH1:'제1장', starterP:'이야기를 시작하세요. <strong>@</strong>를 입력하면 등장인물이나 사건을 언급할 수 있습니다.',
+    mentionBtn:'@ 언급',
+    advisorBtn:'스토리 어드바이저',
+    appliedMsg:'적용되었습니다!'
+  }
+};
+const t = key => T[currentLang][key] !== undefined ? T[currentLang][key] : T.en[key];
+
+function setLang(lang) {
+  currentLang = lang;
+  document.body.className = 'lang-' + lang;
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+  document.getElementById('lang-ko').classList.toggle('active', lang==='ko');
+  applyLang();
+  saveLocal();
+}
+
+function applyLang() {
+  const L = T[currentLang];
+  // tabs
+  document.querySelectorAll('.tab').forEach(tab => { const p=tab.dataset.panel; if(p) tab.textContent=L.tabs[p]; });
+  // header
+  const saveFileLabel = document.getElementById('btn-save-file-label');
+  if (saveFileLabel) saveFileLabel.textContent = L==='ko' ? '파일 저장' : 'Save File';
+  const sdropTitle = document.getElementById('sdrop-title');
+  if (sdropTitle) sdropTitle.textContent = L==='ko' ? '기기에 저장' : 'Save to your device';
+  const sdropCloud = document.getElementById('sdrop-cloud-title');
+  if (sdropCloud) sdropCloud.textContent = L==='ko' ? '클라우드에 저장' : 'Save to cloud';
+  document.getElementById('btn-save-hdr').textContent = L.save;
+  const syncBtn = document.getElementById('btn-sync');
+  const syncLbl = document.getElementById('btn-sync-label');
+  if (syncLbl) syncLbl.textContent = syncBtn.classList.contains('has-changes') ? L.syncBtnChanges : L.syncBtn;
+  // lang indicators
+  document.querySelectorAll('[id^="lang-ind"]').forEach(el=>el.textContent=L.langInd);
+  // toolbars
+  renderToolbars();
+  // board titles
+  ['sec-chars','sec-events'].forEach((id,i)=>{
+    const el=document.getElementById(id); if(el){el.textContent=i===0?L.secChars:L.secTimeline;}
+  });
+  // AI sidebars
+  ['1','2'].forEach(n=>{
+    const t_=id=>document.getElementById(id);
+    if(t_('ai-title-'+n)) t_('ai-title-'+n).textContent=L.aiTitle;
+    if(t_('ai-mode-label-'+n)) t_('ai-mode-label-'+n).textContent=L.aiModeLabel;
+    if(t_('ai-scope-label-'+n)) t_('ai-scope-label-'+n).textContent=L.aiScopeLabel;
+    if(t_('ai-run-label-'+n)) t_('ai-run-label-'+n).textContent=L.aiRunBtn;
+    if(t_('ai-empty-'+n)) t_('ai-empty-'+n).innerHTML=L.aiEmpty;
+    // mode labels
+    document.querySelectorAll(`#ai-mode-grid-${n} .mode-label`).forEach(el=>{
+      const mode=el.closest('.ai-mode-btn')?.dataset.mode;
+      if(mode) el.textContent=L.modes[mode];
+    });
+    // scope labels
+    document.querySelectorAll(`#ai-scope-row-${n} .ai-scope-btn`).forEach(el=>{
+      const scope=el.dataset.scope; if(scope) el.textContent=L.scopes[scope];
+    });
+  });
+  // board
+  renderBoard(); renderBoardAlt();
+  updateWordCount();
+}
+
+// ─────────────────────────────────────────────────
+// TOOLBARS
+// ─────────────────────────────────────────────────
+function renderToolbars() {
+  const L = T[currentLang];
+  const docTB = (sidebarId) => `
+    <button class="tool-btn" onclick="execCmd('bold')"><b>B</b></button>
+    <button class="tool-btn" onclick="execCmd('italic')"><i>I</i></button>
+    <button class="tool-btn" onclick="execCmd('underline')"><u>U</u></button>
+    <div class="sep"></div>
+    <button class="tool-btn" onclick="execCmd('formatBlock','h1')">H1</button>
+    <button class="tool-btn" onclick="execCmd('formatBlock','h2')">H2</button>
+    <button class="tool-btn" onclick="execCmd('formatBlock','p')">¶</button>
+    <div class="sep"></div>
+    <button class="tool-btn" style="font-size:11px;color:var(--muted)">${L.mentionBtn}</button>
+    <div class="sep"></div>
+    <button class="btn-ai-refine" onclick="toggleAiSidebar('${sidebarId}')">✦ ${L.aiRunBtn}</button>
+  `;
+  const boardTB = (variant) => `
+    <span class="label">${L.addLabel}</span>
+    <button class="add-btn add-character" onclick="openModal('character')">${L.addChar}</button>
+    <button class="add-btn add-main" onclick="openModal('main')">${L.addMain}</button>
+    <button class="add-btn add-minor" onclick="openModal('minor')">${L.addMinor}</button>
+    <button class="add-btn add-connect" onclick="openModal('connect')">${L.addConnect}</button>
+    <div style="flex:1"></div>
+    <button class="btn-advisor" id="btn-advisor-${variant}" onclick="toggleAdvisor('${variant}')" title="${L.advisorBtn||'Story Advisor'}">📐 ${L.advisorBtn||'Story Advisor'}</button>
+  `;
+  const el = id => document.getElementById(id);
+  if(el('toolbar-split')) el('toolbar-split').innerHTML = docTB('ai-sidebar');
+  if(el('toolbar-doc')) el('toolbar-doc').innerHTML = docTB('ai-sidebar-2');
+  if(el('board-toolbar-split')) el('board-toolbar-split').innerHTML = boardTB('split');
+  if(el('board-toolbar-solo')) el('board-toolbar-solo').innerHTML = boardTB('solo');
+}
+
+// ─────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────
+const state = { characters:[], events:[], docContent:'' };
+let nextId=1, modalType=null, editingId=null, dragSrcId=null, dragSrcRow=null;
+const aiState = { '1':{ mode:'polish', scope:'selection' }, '2':{ mode:'polish', scope:'selection' } };
+
+// ─────────────────────────────────────────────────
+// CLAUDE API KEY MANAGEMENT
+// Key stored in localStorage — never leaves the browser.
+// Works from any tab, file://, or hosted URL.
+// ─────────────────────────────────────────────────
+const API_KEY_STORAGE = 'storyloom_api_key';
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_STORAGE) || '';
+}
+function setApiKey(key) {
+  if (key) localStorage.setItem(API_KEY_STORAGE, key.trim());
+  else localStorage.removeItem(API_KEY_STORAGE);
+  updateApiKeyIndicator();
+}
+function updateApiKeyIndicator() {
+  const key = getApiKey();
+  const indicator = document.getElementById('api-key-indicator');
+  const btn = document.getElementById('btn-api-key');
+  if (!indicator || !btn) return;
+  if (key) {
+    indicator.style.background = '#52b788';
+    btn.title = 'API key set — click to change';
+  } else {
+    indicator.style.background = '#f59e0b';
+    btn.title = 'No API key — AI features disabled';
+  }
+}
+
+function openApiKeyModal() {
+  const existing = getApiKey();
+  const masked = existing ? existing.slice(0,8) + '••••••••••••••••••••' : '';
+  const overlay = document.createElement('div');
+  overlay.id = 'api-key-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(28,43,26,.55);z-index:9500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)';
+  overlay.innerHTML = `
+    <div style="background:var(--cream);border-radius:16px;padding:36px 40px;width:500px;max-width:96vw;box-shadow:0 24px 64px rgba(0,0,0,.25);border:1px solid var(--border);animation:modalIn .22s ease">
+      <div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:6px;color:var(--ink)">🔑 Anthropic API Key</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;font-family:'DM Sans',sans-serif">
+        Your key is stored <strong>only in this browser</strong> — never sent anywhere except directly to Anthropic's API.
+        Get a key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>.
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-family:'DM Mono',monospace;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:8px">API Key</label>
+        <input id="api-key-input" type="password" placeholder="sk-ant-api03-…"
+          style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;background:white;color:var(--ink);font-family:'DM Mono',monospace;font-size:14px;outline:none;transition:border-color .15s"
+          value="${existing}"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace">Starts with <code style="background:var(--warm-mid);padding:1px 5px;border-radius:3px">sk-ant-</code></div>
+      </div>
+      <div style="background:var(--accent-soft);border:1px solid #b7e4c7;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--slate);font-family:'DM Sans',sans-serif;margin-bottom:20px;line-height:1.6">
+        <strong>Note on CORS:</strong> Direct API calls from a browser require Anthropic's API to allow your origin.
+        If you see CORS errors, use a simple local proxy or open the file via a local server
+        (<code style="background:white;padding:1px 4px;border-radius:3px;font-size:11px">python3 -m http.server</code>).
+        When opened inside <strong>claude.ai</strong>, no key is needed — the proxy handles it automatically.
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+        ${existing ? `<button onclick="setApiKey('');document.getElementById('api-key-overlay').remove();showSync('API key removed')" style="padding:9px 16px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-right:auto">Remove key</button>` : ''}
+        <button onclick="document.getElementById('api-key-overlay').remove()" style="padding:9px 18px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--slate);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Cancel</button>
+        <button onclick="(function(){const k=document.getElementById('api-key-input').value.trim();if(!k||!k.startsWith('sk-')){document.getElementById('api-key-input').style.borderColor='#ef4444';return;}setApiKey(k);document.getElementById('api-key-overlay').remove();showSync('✓ API key saved')})()" style="padding:9px 22px;border-radius:8px;border:none;background:var(--accent);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Save Key</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  setTimeout(() => document.getElementById('api-key-input')?.focus(), 100);
+}
+
+async function callClaude({ system, userMessage, maxTokens = 1000 }) {
+  const apiKey = getApiKey();
+  const headers = { 'Content-Type': 'application/json' };
+
+  // If running inside claude.ai, use the proxy (no key needed)
+  // If a key is set, use it directly
+  // If neither, prompt the user to set a key
+  const onClaudeAi = window.location.hostname.includes('claude.ai') || window.location.hostname.includes('anthropic.com');
+
+  if (!onClaudeAi && !apiKey) {
+    // Show the key modal instead of a raw error
+    openApiKeyModal();
+    throw new Error('Please enter your Anthropic API key to use AI features.');
+  }
+
+  if (apiKey) {
+    headers['x-api-key'] = apiKey;
+    headers['anthropic-version'] = '2023-06-01';
+    headers['anthropic-dangerous-direct-browser-access'] = 'true';
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      ...(system ? { system } : {}),
+      messages: [{ role: 'user', content: userMessage }]
+    })
+  });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody?.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  return (data.content || []).map(b => b.text || '').join('').trim();
+}
+
+// ─────────────────────────────────────────────────
+// PANEL
+// ─────────────────────────────────────────────────
+function switchPanel(name) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelector(`.tab[data-panel="${name}"]`).classList.add('active');
+  if(name==='board') renderBoardAlt();
+}
+
+// ─────────────────────────────────────────────────
+// DOC EDITOR
+// ─────────────────────────────────────────────────
+function execCmd(cmd, val) {
+  document.execCommand(cmd, false, val||null);
+}
+const editor = document.getElementById('doc-editor');
+const editor2 = document.getElementById('doc-editor-2');
+
+function updateWordCount() {
+  const L=T[currentLang];
+  const text = editor.innerText||'';
+  const words=text.trim()?text.trim().split(/\s+/).length:0;
+  const chars=text.length;
+  const lines=text.split('\n').length;
+  document.getElementById('wc-words').textContent=L.words(words);
+  document.getElementById('wc-chars').textContent=L.chars(chars);
+  document.getElementById('wc-lines').textContent=L.lines(lines);
+  document.getElementById('wc-words-2').textContent=L.words(words);
+  document.getElementById('wc-chars-2').textContent=L.chars(chars);
+}
+
+let autoSaveTimer = null;
+function scheduleAutoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    state.docContent = editor.innerHTML;
+    saveLocal();
+    // Show quiet autosave indicator (not the big toast)
+    const ind = document.getElementById('autosave-ind');
+    if (ind) { ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 1400); }
+  }, 1800); // 1.8s after last keystroke
+}
+
+editor.addEventListener('input',()=>{ updateWordCount(); state.docContent=editor.innerHTML; markDocChanged(); checkMentionTrigger(editor); scheduleAutoSave(); });
+editor2.addEventListener('input',()=>{ updateWordCount(); state.docContent=editor2.innerHTML; markDocChanged(); checkMentionTrigger(editor2); scheduleAutoSave(); });
+
+// ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────
+// SMART SYNC
+// Uses Claude to diff doc text ↔ story board, then shows a review modal
+// ─────────────────────────────────────────────────
+let docHasChanges = false;
+let ssyncChanges = []; // array of change objects with .approved state
+
+function markDocChanged() {
+  if (docHasChanges) return;
+  docHasChanges = true;
+  const btn = document.getElementById('btn-sync');
+  const lbl = document.getElementById('btn-sync-label');
+  btn.classList.add('has-changes');
+  if (lbl) lbl.textContent = T[currentLang].syncBtnChanges || 'Sync Now';
+}
+
+async function manualSync() {
+  const L = currentLang;
+  // Save current doc state first
+  state.docContent = editor.innerHTML;
+  editor2.innerHTML = editor.innerHTML;
+  saveLocal();
+
+  // Open modal in loading state
+  ssyncChanges = [];
+  document.getElementById('ssync-overlay').classList.add('open');
+  document.getElementById('ssync-footer').style.display = 'none';
+  document.getElementById('ssync-title').textContent = L==='ko'?'⟳ 스마트 싱크':'⟳ Smart Sync';
+  document.getElementById('ssync-subtitle').textContent = L==='ko'?'문서와 스토리보드를 분석 중…':'Analysing your writing and story board…';
+  document.getElementById('ssync-cancel-btn').textContent = L==='ko'?'취소':'Cancel';
+  document.getElementById('ssync-apply-btn').textContent = L==='ko'?'선택 항목 적용':'Apply Selected';
+  document.getElementById('ssync-loading-text').textContent = L==='ko'?'문서를 읽는 중…':'Reading your document…';
+  document.getElementById('ssync-loading-sub').textContent = L==='ko'?'몇 초 소요됩니다':'This takes a few seconds';
+  document.getElementById('ssync-body').innerHTML = `
+    <div class="ssync-loading">
+      <div class="ssync-loading-ring"></div>
+      <div class="ssync-loading-text">${L==='ko'?'AI가 문서를 분석하는 중…':'AI is analysing your document…'}</div>
+      <div class="ssync-loading-sub">${L==='ko'?'캐릭터와 사건을 식별하는 중입니다':'Identifying characters and events'}</div>
+    </div>`;
+
+  const docText = editor.innerText || '';
+  if (docText.trim().length < 20) {
+    renderSyncNoContent(L);
+    return;
+  }
+
+  // Build context of existing board
+  const existingChars = state.characters.map(c =>
+    `- ${c.name} (${c.role||'Unknown role'})${c.desc ? ': ' + c.desc.slice(0,80) : ''}`
+  ).join('\n') || 'None';
+  const existingEvents = state.events.map((e,i) =>
+    `- [${i+1}] ${e.name} (${e.type})${e.desc ? ': ' + e.desc.slice(0,80) : ''}`
+  ).join('\n') || 'None';
+
+  const docLangHint = docText.slice(0, 80); // Claude will detect from this sample
+
+  const systemPrompt = `You are a story analyst. Given a novel excerpt and the current story board, identify discrepancies and suggest sync changes.
+
+IMPORTANT: Detect the language of the writing excerpt and write ALL names, descriptions, motivations, and reasons in THAT SAME LANGUAGE. If the document is in Korean, all output text must be in Korean. If English, use English. Match the document's language exactly.
+
+Return ONLY a valid JSON object (no markdown, no explanation) with this exact structure:
+{
+  "addToBoard": {
+    "characters": [
+      {"name": "...", "role": "Protagonist|Antagonist|Supporting|Narrator|Other", "desc": "...", "motivation": "..."}
+    ],
+    "events": [
+      {"name": "...", "type": "main|minor|connect", "desc": "...", "chapter": ""}
+    ]
+  },
+  "missingFromDoc": {
+    "characters": [
+      {"id": <number>, "name": "...", "reason": "brief reason why this character seems absent from the writing"}
+    ],
+    "events": [
+      {"id": <number>, "name": "...", "reason": "brief reason why this event seems absent from the writing"}
+    ]
+  }
+}
+
+Rules:
+- addToBoard: characters/events clearly present in the writing but NOT in the story board
+- missingFromDoc: characters/events IN the story board that have no clear presence in the writing excerpt
+- Only suggest additions if you are reasonably confident — do not hallucinate
+- Keep names concise. Keep desc/reason under 100 characters
+- If nothing to add or nothing missing, use empty arrays []
+- role must be exactly one of: Protagonist, Antagonist, Supporting, Narrator, Other (these values are fixed enum keys, keep them in English even if content is Korean)
+- type must be exactly one of: main, minor, connect`;
+
+  try {
+    const raw = await callClaude({
+      system: systemPrompt,
+      userMessage: `WRITING EXCERPT:\n${docText.slice(0, 4000)}\n\nCURRENT STORY BOARD:\nCharacters:\n${existingChars}\n\nEvents:\n${existingEvents}`,
+      maxTokens: 1500
+    });
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON in response');
+    const parsed = JSON.parse(jsonMatch[0]);
+    renderSyncChanges(parsed, L);
+  } catch(err) {
+    document.getElementById('ssync-body').innerHTML = `
+      <div class="ssync-empty">
+        <div class="ssync-empty-icon">⚠️</div>
+        <div class="ssync-empty-text">${L==='ko'?'분석 실패':'Analysis failed'}</div>
+        <div class="ssync-empty-sub" style="color:#ef4444;font-family:'DM Mono',monospace;font-size:11px;line-height:1.5;white-space:pre-wrap">${err.message}</div>
+      </div>`;
+    document.getElementById('ssync-footer').style.display = 'flex';
+    document.getElementById('ssync-apply-btn').style.display = 'none';
+  }
+}
+
+function renderSyncNoContent(L) {
+  document.getElementById('ssync-body').innerHTML = `
+    <div class="ssync-empty">
+      <div class="ssync-empty-icon">✍️</div>
+      <div class="ssync-empty-text">${L==='ko'?'작성된 내용이 없습니다':'Nothing written yet'}</div>
+      <div class="ssync-empty-sub">${L==='ko'?'문서에 내용을 작성한 후 싱크를 시도하세요':'Write something in the document first, then sync'}</div>
+    </div>`;
+  document.getElementById('ssync-footer').style.display = 'flex';
+  document.getElementById('ssync-apply-btn').style.display = 'none';
+}
+
+function renderSyncChanges(parsed, L) {
+  ssyncChanges = [];
+  const addChars = parsed?.addToBoard?.characters || [];
+  const addEvts  = parsed?.addToBoard?.events || [];
+  const misChars = parsed?.missingFromDoc?.characters || [];
+  const misEvts  = parsed?.missingFromDoc?.events || [];
+
+  // Build change list with initial approved=true
+  addChars.forEach((c,i) => ssyncChanges.push({ kind:'add-char',   data:c, approved:true, key:'ac'+i }));
+  addEvts.forEach((e,i)  => ssyncChanges.push({ kind:'add-event',  data:e, approved:true, key:'ae'+i }));
+  misChars.forEach((c,i) => ssyncChanges.push({ kind:'miss-char',  data:c, approved:false, key:'mc'+i }));
+  misEvts.forEach((e,i)  => ssyncChanges.push({ kind:'miss-event', data:e, approved:false, key:'me'+i }));
+
+  if (ssyncChanges.length === 0) {
+    document.getElementById('ssync-body').innerHTML = `
+      <div class="ssync-empty">
+        <div class="ssync-empty-icon">✅</div>
+        <div class="ssync-empty-text">${L==='ko'?'완전히 동기화되어 있습니다':'Everything is in sync'}</div>
+        <div class="ssync-empty-sub">${L==='ko'?'문서와 스토리보드가 일치합니다':'Your writing and story board match up'}</div>
+      </div>`;
+    document.getElementById('ssync-subtitle').textContent = L==='ko'?'변경 사항 없음':'No changes needed';
+    document.getElementById('ssync-footer').style.display = 'flex';
+    document.getElementById('ssync-apply-btn').style.display = 'none';
+    // Mark synced
+    clearSyncIndicator();
+    return;
+  }
+
+  document.getElementById('ssync-subtitle').textContent =
+    L==='ko' ? `${ssyncChanges.length}개의 변경사항 발견` : `${ssyncChanges.length} change${ssyncChanges.length!==1?'s':''} found — review and approve`;
+
+  renderSyncBody(L);
+  updateSyncSummary(L);
+  document.getElementById('ssync-footer').style.display = 'flex';
+  document.getElementById('ssync-apply-btn').style.display = '';
+}
+
+function renderSyncBody(L) {
+  const body = document.getElementById('ssync-body');
+  const addItems = ssyncChanges.filter(c => c.kind==='add-char' || c.kind==='add-event');
+  const misItems = ssyncChanges.filter(c => c.kind==='miss-char' || c.kind==='miss-event');
+
+  let html = '';
+
+  if (addItems.length) {
+    html += `<div class="ssync-section-title">📥 ${L==='ko'?'스토리보드에 추가':'Add to Story Board'} — ${L==='ko'?'글에서 발견됨':'found in your writing'}</div>`;
+    html += addItems.map(ch => renderSyncCard(ch, L)).join('');
+  }
+  if (misItems.length) {
+    html += `<div class="ssync-section-title">🔍 ${L==='ko'?'글에서 누락됨':'Missing from Writing'} — ${L==='ko'?'스토리보드에는 있지만 글에서 언급되지 않음':'in story board but not clearly in the text'}</div>`;
+    html += misItems.map(ch => renderSyncCard(ch, L)).join('');
+  }
+
+  body.innerHTML = html;
+}
+
+function renderSyncCard(ch, L) {
+  const d = ch.data;
+  const icons = { 'add-char':'👤', 'add-event':'📌', 'miss-char':'👻', 'miss-event':'❓' };
+  const labelTxt = {
+    'add-char':   L==='ko'?'새 캐릭터 추가':'New Character',
+    'add-event':  L==='ko'?'새 사건 추가':'New Event',
+    'miss-char':  L==='ko'?'글에 없는 캐릭터':'Character not in writing',
+    'miss-event': L==='ko'?'글에 없는 사건':'Event not in writing',
+  };
+  const labelClass = { 'add-char':'add-char', 'add-event':'add-event', 'miss-char':'missing-char', 'miss-event':'missing-event' };
+  const approvedClass = ch.approved ? 'approved' : 'rejected';
+
+  const detail = ch.kind === 'add-char'
+    ? `${d.role||''}${d.motivation ? ' · ' + d.motivation.slice(0,60) : ''}`
+    : ch.kind === 'add-event'
+    ? `Type: ${d.type}${d.chapter ? ' · ' + d.chapter : ''}`
+    : d.reason || '';
+
+  return `<div class="ssync-change ${approvedClass}" id="ssync-card-${ch.key}">
+    <div class="ssync-change-icon">${icons[ch.kind]}</div>
+    <div class="ssync-change-body">
+      <div class="ssync-change-label ${labelClass[ch.kind]}">${labelTxt[ch.kind]}</div>
+      <div class="ssync-change-name">${d.name}</div>
+      ${d.desc ? `<div class="ssync-change-desc">${d.desc.slice(0,120)}</div>` : ''}
+      ${detail ? `<div class="ssync-change-detail">${detail}</div>` : ''}
+    </div>
+    <div class="ssync-toggle">
+      <button class="ssync-approve-btn ${ch.approved?'active':''}" onclick="setSyncChange('${ch.key}',true)">${L==='ko'?'승인':'Approve'}</button>
+      <button class="ssync-reject-btn ${!ch.approved?'active':''}" onclick="setSyncChange('${ch.key}',false)">${L==='ko'?'거절':'Reject'}</button>
+    </div>
+  </div>`;
+}
+
+function setSyncChange(key, approved) {
+  const ch = ssyncChanges.find(c => c.key === key);
+  if (!ch) return;
+  ch.approved = approved;
+  const card = document.getElementById('ssync-card-' + key);
+  if (card) {
+    card.className = `ssync-change ${approved ? 'approved' : 'rejected'}`;
+    card.querySelectorAll('.ssync-approve-btn').forEach(b => b.classList.toggle('active', approved));
+    card.querySelectorAll('.ssync-reject-btn').forEach(b => b.classList.toggle('active', !approved));
+  }
+  updateSyncSummary(currentLang);
+}
+
+function updateSyncSummary(L) {
+  const approved = ssyncChanges.filter(c => c.approved).length;
+  const total = ssyncChanges.length;
+  const btn = document.getElementById('ssync-apply-btn');
+  document.getElementById('ssync-summary').innerHTML =
+    L==='ko'
+      ? `<strong>${approved}</strong> / ${total} 항목 선택됨`
+      : `<strong>${approved}</strong> of ${total} selected`;
+  btn.disabled = approved === 0;
+}
+
+function applyApprovedChanges() {
+  const L = currentLang;
+  const approved = ssyncChanges.filter(c => c.approved);
+  let addedChars = 0, addedEvts = 0;
+
+  approved.forEach(ch => {
+    const d = ch.data;
+    if (ch.kind === 'add-char') {
+      const exists = state.characters.some(c => c.name.toLowerCase() === d.name.toLowerCase());
+      if (!exists) {
+        const engRoles = ['Protagonist','Antagonist','Supporting','Narrator','Other'];
+        const roleIdx = Math.max(0, engRoles.indexOf(d.role));
+        const roleList = T[currentLang].roles || engRoles;
+        state.characters.push({
+          id: nextId++,
+          name: d.name,
+          role: engRoles[roleIdx], // always store English enum key
+          roleIdx,
+          desc: d.desc || '',
+          motivation: d.motivation || '',
+        });
+        addedChars++;
+      }
+    } else if (ch.kind === 'add-event') {
+      const exists = state.events.some(e => e.name.toLowerCase() === d.name.toLowerCase());
+      if (!exists) {
+        state.events.push({
+          id: nextId++,
+          name: d.name,
+          type: ['main','minor','connect'].includes(d.type) ? d.type : 'main',
+          desc: d.desc || '',
+          chapter: d.chapter || '',
+          chars: [],
+        });
+        addedEvts++;
+      }
+    }
+    // miss-char / miss-event: these are informational only — we don't auto-delete
+    // The user is just notified; they can manually remove from the board if desired
+  });
+
+  renderBoard(); renderBoardAlt(); saveLocal();
+  clearSyncIndicator();
+  closeSyncModal();
+
+  const msg = L==='ko'
+    ? `${addedChars > 0 ? `캐릭터 ${addedChars}명` : ''}${addedChars&&addedEvts?' · ':''}${addedEvts > 0 ? `사건 ${addedEvts}건` : ''} 추가됨 ✓`
+    : `${addedChars > 0 ? `${addedChars} character${addedChars!==1?'s':''}` : ''}${addedChars&&addedEvts?' · ':''}${addedEvts > 0 ? `${addedEvts} event${addedEvts!==1?'s':''}` : ''} added ✓`;
+  showSync(msg || (L==='ko'?'동기화 완료':'Sync complete'));
+}
+
+function clearSyncIndicator() {
+  docHasChanges = false;
+  const btn = document.getElementById('btn-sync');
+  const lbl = document.getElementById('btn-sync-label');
+  btn.classList.remove('has-changes', 'syncing');
+  btn.classList.add('just-synced');
+  if (lbl) lbl.textContent = T[currentLang].syncBtn || 'Sync';
+  setTimeout(() => btn.classList.remove('just-synced'), 1800);
+}
+
+function closeSyncModal() {
+  document.getElementById('ssync-overlay').classList.remove('open');
+}
+
+function closeSyncModal() {
+  document.getElementById('ssync-overlay').classList.remove('open');
+}
+
+// ─────────────────────────────────────────────────
+// CARD → DOC HIGHLIGHT
+// Click an event card to find & highlight corresponding text in the editor
+// ─────────────────────────────────────────────────
+async function highlightEventInDoc(evId, e) {
+  if (e && e.target.closest('button, img')) return;
+
+  const ev = state.events.find(x => x.id == evId);
+  if (!ev) return;
+
+  const activePanel = document.querySelector('.panel.active');
+  if (activePanel?.id === 'panel-board') switchPanel('split');
+
+  clearDocHighlights();
+
+  // Show searching indicator on the card
+  const card = document.getElementById('card-' + evId);
+  if (card) { card.style.transition = 'box-shadow .2s'; card.style.boxShadow = '0 0 0 3px #52b788aa'; }
+
+  const terms = buildSearchTerms(ev.name, ev.desc);
+  let found = false;
+
+  // Pass 1: direct text match
+  for (const term of terms) {
+    if (highlightTermInEditor(editor, term)) { found = true; break; }
+  }
+
+  // Pass 2: try linked character names
+  if (!found) {
+    const charTerms = (ev.chars||[]).map(cid => state.characters.find(c=>c.id==cid)?.name).filter(Boolean);
+    for (const t of charTerms) {
+      if (highlightTermInEditor(editor, t)) { found = true; break; }
+    }
+  }
+
+  // Pass 3: detect document language and translate terms if needed
+  if (!found) {
+    showSync(currentLang==='ko' ? '번역 후 검색 중…' : 'Translating to search…');
+    const docSample = (editor.innerText||'').slice(0, 300);
+    const translated = await translateTermsToDocLang(ev.name, ev.desc, docSample);
+    if (translated && translated.length) {
+      for (const term of translated) {
+        if (highlightTermInEditor(editor, term)) { found = true; break; }
+      }
+    }
+  }
+
+  if (found) {
+    const mark = editor.querySelector('mark.story-highlight');
+    if (mark) mark.scrollIntoView({ behavior:'smooth', block:'center' });
+    if (card) { card.style.boxShadow = '0 0 0 3px #52b788'; setTimeout(() => { card.style.boxShadow = ''; }, 1400); }
+    showSync(currentLang==='ko' ? '문서에서 강조됨 ✓' : 'Highlighted in document ✓');
+    setTimeout(clearDocHighlights, 6000);
+  } else {
+    if (card) { card.style.boxShadow = ''; }
+    showSync(currentLang==='ko' ? '문서에서 찾을 수 없음' : 'Not found in document');
+  }
+}
+
+async function translateTermsToDocLang(name, desc, docSample) {
+  if (!docSample || docSample.trim().length < 10) return [];
+  try {
+    const raw = await callClaude({
+      userMessage: `The document is written in this language (sample): "${docSample.slice(0,200)}"
+
+The story board card has this info:
+- Name: "${name}"
+- Description: "${desc||''}"
+
+Translate the card name and any key descriptive words into the document's language so we can search for them.
+Return ONLY a JSON array of search strings, most specific first. Max 6 items. Example: ["세 번째 데이트 거절","데이트 거절","거절"]
+No explanation, just the JSON array.`,
+      maxTokens: 200
+    });
+    const match = raw.match(/\[[\s\S]*?\]/);
+    if (!match) return [];
+    return JSON.parse(match[0]).filter(s => typeof s === 'string' && s.length > 0);
+  } catch(e) {
+    return [];
+  }
+}
+
+function buildSearchTerms(name, desc) {
+  const terms = [];
+  if (name) terms.push(name.trim());
+  // Multi-word substrings from name
+  const nameWords = (name||'').split(/\s+/).filter(w => w.length > 3);
+  if (nameWords.length >= 2) terms.push(nameWords.slice(0, 2).join(' '));
+  nameWords.forEach(w => terms.push(w));
+  // Key phrase from desc
+  if (desc) {
+    const dWords = desc.trim().split(/\s+/).filter(w => w.length > 3);
+    if (dWords.length >= 2) terms.push(dWords.slice(0, 3).join(' '));
+    dWords.slice(0, 4).forEach(w => terms.push(w));
+  }
+  return [...new Set(terms)];
+}
+
+function highlightTermInEditor(ed, term) {
+  if (!term || term.length < 2) return false;
+  // Use TreeWalker to search actual text nodes — immune to HTML tag splits
+  const walker = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT, null);
+  const termLower = term.toLowerCase();
+  let node;
+  while ((node = walker.nextNode())) {
+    const text = node.textContent;
+    const idx = text.toLowerCase().indexOf(termLower);
+    if (idx === -1) continue;
+    // Found — wrap the match in a <mark>
+    const range = document.createRange();
+    range.setStart(node, idx);
+    range.setEnd(node, idx + term.length);
+    const mark = document.createElement('mark');
+    mark.className = 'story-highlight';
+    range.surroundContents(mark);
+    state.docContent = editor.innerHTML;
+    editor2.innerHTML = editor.innerHTML;
+    return true;
+  }
+  return false;
+}
+
+function clearDocHighlights() {
+  [editor, editor2].forEach(ed => {
+    ed.querySelectorAll('mark.story-highlight').forEach(mark => {
+      const parent = mark.parentNode;
+      while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+      parent.removeChild(mark);
+      parent.normalize();
+    });
+  });
+  state.docContent = editor.innerHTML;
+}
+
+// ─────────────────────────────────────────────────
+// SELECTION → ADD TO BOARD
+// Show a floating toolbar when text is selected in either editor
+// ─────────────────────────────────────────────────
+let selToolbarActive = false;
+let lastSelection = null;
+let lastSelectionText = '';
+let lastSelectionRange = null;
+
+function showSelToolbar(x, y, text) {
+  const tb = document.getElementById('sel-toolbar');
+  const L = currentLang;
+  document.getElementById('sel-tb-label').textContent = L==='ko'?'보드에 추가':'Add to Board';
+  document.getElementById('sel-tb-icon').textContent = '📌';
+  const btn = document.getElementById('sel-tb-add-btn');
+  btn.classList.remove('loading');
+  btn.disabled = false;
+
+  // Position above the selection
+  const tbW = 180;
+  const left = Math.min(x - tbW/2, window.innerWidth - tbW - 8);
+  tb.style.left = Math.max(8, left) + 'px';
+  tb.style.top = (y - 48) + 'px';
+  tb.classList.add('show');
+  selToolbarActive = true;
+}
+
+function hideSelToolbar() {
+  document.getElementById('sel-toolbar').classList.remove('show');
+  selToolbarActive = false;
+  lastSelectionText = '';
+  lastSelectionRange = null;
+}
+
+function onEditorMouseUp(e) {
+  // Delay to let selection settle
+  setTimeout(() => {
+    const sel = window.getSelection();
+    const text = sel?.toString()?.trim();
+    if (!text || text.length < 4) { hideSelToolbar(); return; }
+
+    // Make sure the selection is inside an editor
+    const anchor = sel.anchorNode;
+    if (!editor.contains(anchor) && !editor2.contains(anchor)) return;
+
+    lastSelectionText = text;
+    // Save range for later restore
+    if (sel.rangeCount > 0) lastSelectionRange = sel.getRangeAt(0).cloneRange();
+
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    const midX = rect.left + rect.width / 2;
+    const topY = rect.top + window.scrollY;
+    showSelToolbar(midX, rect.top, text);
+  }, 10);
+}
+
+[editor, editor2].forEach(ed => {
+  ed.addEventListener('mouseup', onEditorMouseUp);
+  ed.addEventListener('keyup', e => {
+    const sel = window.getSelection();
+    if (!sel?.toString()?.trim()) hideSelToolbar();
+  });
+});
+
+// Hide toolbar when clicking outside editors
+document.addEventListener('mousedown', e => {
+  const tb = document.getElementById('sel-toolbar');
+  if (tb.contains(e.target)) return;
+  if (editor.contains(e.target) || editor2.contains(e.target)) return;
+  hideSelToolbar();
+});
+
+async function addSelectionToBoard() {
+  const text = lastSelectionText;
+  if (!text) return;
+
+  const L = currentLang;
+  const btn = document.getElementById('sel-tb-add-btn');
+  const icon = document.getElementById('sel-tb-icon');
+  const lbl = document.getElementById('sel-tb-label');
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+  icon.textContent = '⏳';
+  lbl.textContent = L==='ko'?'분석 중…':'Analysing…';
+
+  const existingNames = [
+    ...state.characters.map(c=>c.name),
+    ...state.events.map(e=>e.name)
+  ].join(', ');
+
+  const system = `You are a story analyst. Given a text excerpt from a novel, determine if it primarily describes a CHARACTER or an EVENT/SCENE, and extract the key details to create a story board card.
+
+IMPORTANT: Write all output text (name, desc, motivation, chapter) in the SAME LANGUAGE as the excerpt. If the excerpt is in Korean, respond in Korean. If English, respond in English.
+
+Return ONLY valid JSON, no markdown:
+{
+  "cardType": "character" | "main" | "minor" | "connect",
+  "name": "concise name (max 5 words)",
+  "role": "Protagonist"|"Antagonist"|"Supporting"|"Narrator"|"Other",
+  "desc": "brief description (max 100 chars)",
+  "motivation": "if character: what drives them (max 60 chars)",
+  "chapter": "if event: chapter/act reference if mentioned"
+}
+
+Rules:
+- If the text introduces or describes a person → cardType: "character"
+- If the text describes something that HAPPENS → cardType: "main", "minor", or "connect"
+  - "main" = pivotal plot moment
+  - "minor" = smaller scene or detail
+  - "connect" = transitional link between events
+- role must remain one of the exact English enum values listed above (used as keys internally)
+- Keep names concise and meaningful`;
+
+  try {
+    const raw = await callClaude({
+      system,
+      userMessage: `EXCERPT:\n"${text.slice(0,600)}"\n\nEXISTING BOARD ITEMS: ${existingNames||'None'}`,
+      maxTokens: 300
+    });
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('No JSON');
+    const parsed = JSON.parse(match[0]);
+
+    hideSelToolbar();
+    wrapSelectionWithSourceMark(text);
+    openModalPrefilled(parsed, text);
+
+  } catch(err) {
+    icon.textContent = '⚠️';
+    lbl.textContent = L==='ko'?'실패 — 다시 시도':'Failed — retry';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    setTimeout(() => {
+      icon.textContent = '📌';
+      lbl.textContent = L==='ko'?'보드에 추가':'Add to Board';
+    }, 2000);
+  }
+}
+
+function wrapSelectionWithSourceMark(text) {
+  const snippet = text.slice(0, 120).trim();
+  if (!snippet) return;
+  [editor, editor2].forEach(ed => {
+    const walker = document.createTreeWalker(ed, NodeFilter.SHOW_TEXT, null);
+    const snippetLower = snippet.toLowerCase();
+    let node;
+    while ((node = walker.nextNode())) {
+      const idx = node.textContent.toLowerCase().indexOf(snippetLower);
+      if (idx === -1) continue;
+      try {
+        const range = document.createRange();
+        range.setStart(node, idx);
+        range.setEnd(node, idx + snippet.length);
+        const mark = document.createElement('mark');
+        mark.style.cssText = 'background:linear-gradient(120deg,#bbf7d0,#d1fae5);border-radius:3px;padding:1px 0;box-shadow:0 0 0 1.5px #22c55e';
+        range.surroundContents(mark);
+        state.docContent = editor.innerHTML;
+      } catch(e) { /* range crossed node boundary, skip */ }
+      break;
+    }
+  });
+  setTimeout(() => {
+    [editor, editor2].forEach(ed => {
+      ed.querySelectorAll('mark[style*="bbf7d0"]').forEach(m => {
+        const parent = m.parentNode;
+        while (m.firstChild) parent.insertBefore(m.firstChild, m);
+        parent.removeChild(m);
+        parent.normalize();
+      });
+      state.docContent = editor.innerHTML;
+    });
+  }, 4000);
+}
+
+function openModalPrefilled(parsed, sourceText) {
+  const L = currentLang;
+  const type = parsed.cardType || 'main';
+
+  // Open the modal normally first
+  openModal(type);
+
+  // Then fill in fields after a tick
+  setTimeout(() => {
+    const nameEl = document.getElementById('f-name');
+    const descEl = document.getElementById('f-desc');
+    const motivEl = document.getElementById('f-motivation');
+    const chapterEl = document.getElementById('f-chapter');
+    const roleEl = document.getElementById('f-role');
+
+    if (nameEl) nameEl.value = parsed.name || '';
+    if (descEl) descEl.value = parsed.desc || sourceText.slice(0,100);
+    if (motivEl && parsed.motivation) motivEl.value = parsed.motivation;
+    if (chapterEl && parsed.chapter) chapterEl.value = parsed.chapter;
+    if (roleEl && parsed.role) {
+      const roles = ['Protagonist','Antagonist','Supporting','Narrator','Other'];
+      const idx = roles.indexOf(parsed.role);
+      if (idx >= 0) roleEl.selectedIndex = idx;
+    }
+
+    // Flash the modal title to signal it was auto-filled
+    const titleEl = document.getElementById('modal-title');
+    if (titleEl) {
+      const orig = titleEl.textContent;
+      titleEl.style.color = '#16a34a';
+      titleEl.textContent = (L==='ko'?'✓ AI가 자동 입력함 — ':'✓ AI pre-filled — ') + orig;
+      setTimeout(() => { titleEl.style.color = ''; titleEl.textContent = orig; }, 2500);
+    }
+  }, 50);
+}
+
+
+// ─────────────────────────────────────────────────
+
+// Classic 3-act / hero's journey beats used as the arc template
+const STORY_BEATS = [
+  { id:'ordinary',  label:'Ordinary\nWorld',     color:'#6b7280', dot:'#d1d5db' },
+  { id:'inciting',  label:'Inciting\nIncident',  color:'#2d6a4f', dot:'#52b788' },
+  { id:'rising',    label:'Rising\nAction',       color:'#1b5e20', dot:'#388e3c' },
+  { id:'midpoint',  label:'Midpoint\nTwist',      color:'#7c3aed', dot:'#7c3aed' },
+  { id:'dark',      label:'Dark\nNight',          color:'#1d4ed8', dot:'#3b82f6' },
+  { id:'climax',    label:'Climax',               color:'#1a3c34', dot:'#2d9d6a' },
+  { id:'falling',   label:'Falling\nAction',      color:'#0284c7', dot:'#0284c7' },
+  { id:'resolution',label:'Resolution',           color:'#16a34a', dot:'#22c55e' },
+];
+
+const BEAT_LABELS_KO = {
+  ordinary:'일상\n세계', inciting:'발단\n사건', rising:'갈등\n고조', midpoint:'중반\n전환',
+  dark:'위기', climax:'클라이맥스', falling:'결말\n전개', resolution:'해결',
+};
+
+let advisorSuggestions = {}; // keyed by variant: 'split'|'solo'
+let advisorOpen = { split: false, solo: false };
+let arcVisible = true;
+
+function toggleAdvisor(variant) {
+  if (advisorOpen[variant]) {
+    closeAdvisor(variant);
+  } else {
+    openAdvisor(variant);
+  }
+}
+
+async function openAdvisor(variant) {
+  advisorOpen[variant] = true;
+  const panel = document.getElementById('struct-panel-' + variant);
+  const btn = document.getElementById('btn-advisor-' + variant);
+  panel.classList.add('open');
+  if (btn) btn.classList.add('active');
+
+  // If we already have suggestions, just show them
+  if (advisorSuggestions[variant]) {
+    renderAdvisorBody(variant, advisorSuggestions[variant]);
+    return;
+  }
+  await runAdvisor(variant);
+}
+
+function closeAdvisor(variant) {
+  advisorOpen[variant] = false;
+  document.getElementById('struct-panel-' + variant)?.classList.remove('open');
+  document.getElementById('btn-advisor-' + variant)?.classList.remove('active');
+}
+
+async function runAdvisor(variant) {
+  const L = currentLang;
+  const body = document.getElementById('struct-body-' + variant);
+  body.innerHTML = `<div class="struct-panel-loading"><div class="struct-loading-ring"></div><div class="struct-loading-text">${L==='ko'?'스토리를 분석하는 중…':'Analysing your story…'}</div></div>`;
+
+  const docText = (editor.innerText || '').slice(0, 5000);
+  const chars = state.characters.map(c => `${c.name} (${c.role})`).join(', ') || 'None';
+  const events = state.events.map((e,i) => `[${i+1}] ${e.name} (${e.type})`).join(', ') || 'None';
+
+  const system = `You are a master story structure analyst. Analyse the novel excerpt and story board against classic narrative structures (3-Act, Hero's Journey, Save the Cat beats).
+
+Return ONLY a valid JSON array of suggestion objects, no markdown. Each object:
+{
+  "id": "unique_string",
+  "category": "Structure"|"Character"|"Conflict"|"Pacing"|"Theme"|"World",
+  "icon": "single emoji",
+  "title": "short title (max 8 words)",
+  "body": "specific actionable suggestion (2-3 sentences, max 120 chars)",
+  "priority": "high"|"medium"|"low",
+  "beat": "ordinary"|"inciting"|"rising"|"midpoint"|"dark"|"climax"|"falling"|"resolution"|null
+}
+
+Give 4-8 suggestions. Focus on what is MISSING or WEAK:
+- Missing story beats (no antagonist, no climax event, no character arc)
+- Structural gaps (no midpoint twist, no dark night of the soul)
+- Character weaknesses (protagonist has no clear flaw, no mentor)
+- Pacing issues (all events same type)
+- Thematic opportunities
+Be specific to THIS story's content, not generic.`;
+
+  try {
+    const raw = await callClaude({
+      system,
+      userMessage: `WRITING (excerpt):\n${docText || 'No writing yet.'}\n\nCHARACTERS: ${chars}\nEVENTS: ${events}`,
+      maxTokens: 1200
+    });
+    const match = raw.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('No JSON array');
+    const suggestions = JSON.parse(match[0]);
+    advisorSuggestions[variant] = suggestions;
+    renderAdvisorBody(variant, suggestions);
+    renderArcTemplate('split');
+    renderArcTemplate('solo');
+  } catch(e) {
+    body.innerHTML = `<div style="padding:32px 16px;text-align:center;color:var(--muted)">
+      <div style="font-size:28px;margin-bottom:10px">⚠️</div>
+      <div style="font-size:13px;font-weight:600;color:var(--slate);margin-bottom:4px">${L==='ko'?'분석 실패':'Analysis failed'}</div>
+      <div style="font-size:11px;font-family:'DM Mono',monospace;color:#ef4444;line-height:1.5;white-space:pre-wrap">${e.message}</div>
+    </div>`;
+  }
+}
+
+function renderAdvisorBody(variant, suggestions) {
+  const L = currentLang;
+  const body = document.getElementById('struct-body-' + variant);
+  if (!suggestions || suggestions.length === 0) {
+    body.innerHTML = `<div style="padding:32px 16px;text-align:center;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">✨</div><div style="font-size:13px;font-weight:600">${L==='ko'?'훌륭한 구조입니다!':'Great structure!'}</div></div>`;
+    return;
+  }
+  // Sort by priority
+  const order = { high:0, medium:1, low:2 };
+  const sorted = [...suggestions].sort((a,b) => (order[a.priority]||1) - (order[b.priority]||1));
+
+  body.innerHTML = sorted.map(s => `
+    <div class="struct-suggestion" id="sug-${variant}-${s.id}">
+      <div class="struct-sug-header">
+        <div class="struct-sug-icon">${s.icon||'💡'}</div>
+        <div class="struct-sug-meta">
+          <div class="struct-sug-category">${s.category||''}${s.beat ? ' · ' + (L==='ko'?BEAT_LABELS_KO[s.beat]?.replace('\n',' '):s.beat.replace('_',' ')) : ''}</div>
+          <div class="struct-sug-title">${s.title}</div>
+        </div>
+        <button class="struct-sug-dismiss" onclick="dismissSuggestion('${variant}','${s.id}')" title="Dismiss">✕</button>
+      </div>
+      <div class="struct-sug-body">${s.body}</div>
+      <span class="struct-sug-priority priority-${s.priority}">${s.priority==='high'?(L==='ko'?'중요':'High'):s.priority==='medium'?(L==='ko'?'보통':'Medium'):(L==='ko'?'낮음':'Low')}</span>
+    </div>`).join('');
+
+  document.getElementById('struct-refresh-label-' + variant).textContent = L==='ko'?'다시 분석':'Re-analyse';
+}
+
+function dismissSuggestion(variant, id) {
+  const el = document.getElementById(`sug-${variant}-${id}`);
+  if (el) { el.style.opacity='0'; el.style.transform='translateX(20px)'; el.style.transition='all .25s'; setTimeout(()=>el.remove(), 250); }
+  // Also dismiss in other variant
+  const other = variant==='split'?'solo':'split';
+  const el2 = document.getElementById(`sug-${other}-${id}`);
+  if (el2) { el2.style.opacity='0'; setTimeout(()=>el2.remove(), 250); }
+  // Remove from cached suggestions
+  if (advisorSuggestions[variant]) advisorSuggestions[variant] = advisorSuggestions[variant].filter(s=>s.id!==id);
+  if (advisorSuggestions[other]) advisorSuggestions[other] = advisorSuggestions[other].filter(s=>s.id!==id);
+}
+
+// ── ARC TEMPLATE ──
+function renderArcTemplate(slot) {
+  const container = document.getElementById('arc-template-' + slot);
+  if (!container) return;
+  if (!arcVisible) { container.innerHTML = ''; return; }
+  const L = currentLang;
+
+  // Map existing events to beats using advisor suggestions or keyword matching
+  const beatMap = buildBeatMap();
+
+  const beatsHtml = STORY_BEATS.map(beat => {
+    const label = L==='ko' ? (BEAT_LABELS_KO[beat.id]||beat.label) : beat.label;
+    const eventsInBeat = beatMap[beat.id] || [];
+    const chipsHtml = eventsInBeat.length
+      ? eventsInBeat.map(ev => `<div class="arc-beat-event-chip" title="${ev.name}">${ev.name.slice(0,14)}</div>`).join('')
+      : `<div class="arc-beat-empty">${L==='ko'?'비어있음':'empty'}</div>`;
+    return `<div class="arc-beat">
+      <div class="arc-beat-events">${chipsHtml}</div>
+      <div class="arc-beat-dot" style="background:${beat.dot};box-shadow:0 0 0 2px white, 0 0 0 4px ${beat.dot}40"></div>
+      <div class="arc-beat-label" style="color:${beat.color}">${label}</div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="structure-arc">
+      <div class="structure-arc-header">
+        <div class="structure-arc-title">📖 ${L==='ko'?'이야기 구조 템플릿':'Story Arc Template'}</div>
+        <button class="structure-arc-toggle" onclick="toggleArcTemplate()">${L==='ko'?'숨기기':'Hide'}</button>
+      </div>
+      <div class="structure-arc-body">
+        <div class="arc-track">${beatsHtml}</div>
+        <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-align:center;margin-top:4px">${L==='ko'?'사건을 드래그하여 스토리 비트에 배치하세요 · 클릭하여 스크롤':'Events are mapped by keyword matching · Click a chip to scroll'}</div>
+      </div>
+    </div>`;
+}
+
+function buildBeatMap() {
+  // Keyword-based mapping of events to beats
+  const map = {};
+  const keywords = {
+    ordinary:   ['ordinary','begin','start','daily','normal','routine','world','생활','시작','일상'],
+    inciting:   ['discover','find','meet','inciting','call','incident','accident','발견','만남','사건'],
+    rising:     ['challenge','conflict','problem','trouble','danger','enemy','train','grow','갈등','문제','위험'],
+    midpoint:   ['twist','reveal','turn','midpoint','realize','discover','surprise','전환','반전','깨달음'],
+    dark:       ['fail','lose','dark','crisis','all is lost','hopeless','betray','실패','위기','절망'],
+    climax:     ['climax','final','battle','confront','showdown','fight','peak','클라이맥스','최후','대결'],
+    falling:    ['aftermath','escape','resolve','flee','chase','falling','aftermath','탈출','결말'],
+    resolution: ['end','peace','home','conclusion','resolution','epilogue','결말','평화','해결'],
+  };
+  state.events.forEach(ev => {
+    const text = (ev.name + ' ' + ev.desc).toLowerCase();
+    let matched = false;
+    for (const [beat, words] of Object.entries(keywords)) {
+      if (words.some(w => text.includes(w))) {
+        if (!map[beat]) map[beat] = [];
+        map[beat].push(ev);
+        matched = true;
+        break;
+      }
+    }
+    // Fallback: distribute by index position
+    if (!matched) {
+      const idx = state.events.indexOf(ev);
+      const total = state.events.length;
+      const beatKeys = Object.keys(keywords);
+      const pos = Math.min(Math.floor((idx/Math.max(total,1))*beatKeys.length), beatKeys.length-1);
+      const b = beatKeys[pos];
+      if (!map[b]) map[b] = [];
+      map[b].push(ev);
+    }
+  });
+  return map;
+}
+
+function toggleArcTemplate() {
+  arcVisible = !arcVisible;
+  renderArcTemplate('split');
+  renderArcTemplate('solo');
+}
+
+
+[editor,editor2].forEach(ed=>{
+  ed.addEventListener('keydown',e=>{ if(mentionActive){ if(e.key==='Escape'){closeMentionPopup();} else if(e.key==='Enter'){e.preventDefault();document.querySelector('.mention-item')?.click();} } });
+  ed.addEventListener('keyup',()=>checkMentionTrigger(ed));
+});
+function checkMentionTrigger(ed) {
+  const sel=window.getSelection(); if(!sel?.rangeCount) return;
+  const txt=sel.anchorNode?.textContent||''; const off=sel.anchorOffset;
+  const before=txt.slice(0,off); const atIdx=before.lastIndexOf('@');
+  if(atIdx>=0){ showMentionPopup(before.slice(atIdx+1).toLowerCase(), sel); }
+  else { closeMentionPopup(); }
+}
+function showMentionPopup(query,sel) {
+  const popup=document.getElementById('mention-popup');
+  const items=[
+    ...state.characters.filter(c=>c.name.toLowerCase().includes(query)).map(c=>({label:c.name,type:'char',id:c.id})),
+    ...state.events.filter(e=>e.name.toLowerCase().includes(query)).map(e=>({label:e.name,type:'event',id:e.id}))
+  ];
+  if(!items.length){closeMentionPopup();return;}
+  popup.innerHTML=items.map(it=>`<div class="mention-item" onclick="insertMention('${it.type}','${it.id}','${it.label.replace(/'/g,"&#39;")}')"><div class="mention-dot ${it.type==='char'?'dot-char':'dot-event'}"></div>${it.label}</div>`).join('');
+  const rect=sel.getRangeAt(0).getBoundingClientRect();
+  popup.style.left=rect.left+'px'; popup.style.top=(rect.bottom+4)+'px'; popup.style.display='block';
+  mentionActive=true;
+}
+function closeMentionPopup(){document.getElementById('mention-popup').style.display='none';mentionActive=false;}
+function insertMention(type,id,label) {
+  closeMentionPopup();
+  const sel=window.getSelection(); if(!sel?.rangeCount) return;
+  const range=sel.getRangeAt(0); const node=range.startContainer;
+  const txt=node.textContent; const off=range.startOffset;
+  const atIdx=txt.slice(0,off).lastIndexOf('@');
+  if(atIdx>=0){ node.textContent=txt.slice(0,atIdx)+txt.slice(off); range.setStart(node,atIdx);range.setEnd(node,atIdx);sel.removeAllRanges();sel.addRange(range); }
+  document.execCommand('insertHTML',false,`<span class="${type==='char'?'char-mention':'event-mention'}" data-id="${id}" contenteditable="false">@${label}</span>&nbsp;`);
+  showSync(T[currentLang].syncs.created);
+}
+
+// ─────────────────────────────────────────────────
+// AI SIDEBAR
+// ─────────────────────────────────────────────────
+function toggleAiSidebar(id) {
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+}
+function closeAiSidebar(id) { document.getElementById(id).classList.remove('open'); }
+
+function selectMode(btn, n) {
+  btn.closest('.ai-mode-grid').querySelectorAll('.ai-mode-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  aiState[n].mode = btn.dataset.mode;
+}
+function selectScope(btn, n) {
+  btn.closest('.ai-scope-row').querySelectorAll('.ai-scope-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  aiState[n].scope = btn.dataset.scope;
+}
+
+function getRefineText(ed, scope) {
+  if(scope==='all') return { text:ed.innerText||ed.textContent, type:'all' };
+  if(scope==='selection') {
+    const sel=window.getSelection(); const txt=sel?.toString()?.trim();
+    if(txt) return { text:txt, type:'selection' };
+  }
+  // paragraph or fallback
+  const sel=window.getSelection();
+  if(sel?.rangeCount){
+    let node=sel.anchorNode;
+    while(node&&node!==ed){ if(['P','H1','H2','H3','DIV'].includes(node.nodeName)) return {text:node.innerText||node.textContent, type:'paragraph', node}; node=node.parentNode; }
+  }
+  const p=ed.querySelector('p,h1,h2'); if(p) return {text:p.innerText||p.textContent, type:'paragraph', node:p};
+  return null;
+}
+
+function buildPrompt(text, mode, lang) {
+  const langNote = lang==='ko'
+    ? '반드시 한국어로만 답하세요. Do NOT use English in your response.'
+    : 'Respond in English only.';
+  const modeInstr = {
+    polish:`Polish and refine the prose — improve flow, fix awkward phrasing, enhance clarity, correct grammar. Keep the author's voice and story content intact.`,
+    vivid:`Make the writing more vivid and sensory — add evocative details, stronger imagery, richer descriptions. Keep the story content the same.`,
+    concise:`Make the writing more concise — cut unnecessary words, tighten sentences, remove redundancy. Preserve the core meaning.`,
+    dramatic:`Heighten the dramatic tension — intensify emotions, raise stakes, create urgency. Keep the story content the same.`,
+    poetic:`Make the writing more lyrical and poetic — use beautiful language, rhythm, imagery. Preserve the story content.`,
+    dialogue:`Sharpen any dialogue — make it sound natural, distinct per character, more engaging. If no dialogue, improve character voice.`
+  };
+  return `You are a skilled literary editor helping a novelist refine their writing. ${langNote}
+
+Refinement mode: ${modeInstr[mode]||modeInstr.polish}
+
+Original text:
+"""
+${text}
+"""
+
+Return ONLY the refined text. No commentary, no explanations, no labels, no quotation marks around it.`;
+}
+
+async function runAiRefine(n) {
+  const ed = n==='1' ? editor : editor2;
+  const resultArea = document.getElementById('ai-result-'+n);
+  const runBtn = document.getElementById('ai-run-'+n);
+  const { mode, scope } = aiState[n];
+  const L = T[currentLang];
+
+  const extracted = getRefineText(ed, scope);
+  if(!extracted||!extracted.text.trim()){
+    resultArea.innerHTML=`<div class="ai-empty-state"><div class="ai-icon">⚠️</div><div>${L.noSel}</div></div>`;
+    return;
+  }
+  runBtn.disabled=true;
+  resultArea.innerHTML=`<div class="ai-loading"><div class="ai-spinner"></div><div class="ai-loading-text">${L.aiLoading}</div></div>`;
+  resultArea._data = null;
+
+  try {
+    const refined = await callClaude({
+      userMessage: buildPrompt(extracted.text, mode, currentLang),
+      maxTokens: 1000
+    });
+    if(!refined) throw new Error('Empty response');
+
+    resultArea._data = { refined, type:extracted.type, node:extracted.node };
+    resultArea.innerHTML=`
+      <div class="ai-result-box">
+        <div class="ai-result-label"><span>${L.aiResultLabel} · ${L.modes[mode]}</span></div>
+        <div class="ai-result-text">${escHtml(refined)}</div>
+        <button class="ai-accept-btn" onclick="acceptRefined('${n}')">${L.aiAccept}</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);padding:4px 2px;font-family:'DM Mono',monospace">${extracted.text.length} → ${refined.length} chars</div>`;
+  } catch(err) {
+    resultArea.innerHTML=`<div class="ai-empty-state"><div class="ai-icon">⚠️</div><div style="line-height:1.5;white-space:pre-wrap">${err.message}</div></div>`;
+  } finally { runBtn.disabled=false; }
+}
+
+function acceptRefined(n) {
+  const resultArea = document.getElementById('ai-result-'+n);
+  const ed = n==='1' ? editor : editor2;
+  const d = resultArea._data; if(!d) return;
+
+  if(d.type==='selection'){
+    const sel=window.getSelection();
+    if(sel&&sel.rangeCount&&sel.toString().trim()){ sel.deleteFromDocument(); document.execCommand('insertText',false,d.refined); }
+    else if(d.node&&ed.contains(d.node)){ d.node.textContent=d.refined; }
+  } else if(d.type==='paragraph'&&d.node&&ed.contains(d.node)){
+    d.node.textContent=d.refined;
+  } else if(d.type==='all'){
+    ed.innerHTML=d.refined.split('\n').filter(l=>l.trim()).map(l=>`<p>${escHtml(l)}</p>`).join('');
+  }
+  if(ed===editor) editor2.innerHTML=editor.innerHTML; else editor.innerHTML=editor2.innerHTML;
+  state.docContent=editor.innerHTML; updateWordCount(); saveLocal();
+  docHasChanges = false; // AI just synced both sides
+  const syncBtn=document.getElementById('btn-sync'); const syncLbl=document.getElementById('btn-sync-label');
+  if(syncBtn){ syncBtn.classList.remove('has-changes'); if(syncLbl) syncLbl.textContent=T[currentLang].syncBtn||'Sync'; }
+  showSync(T[currentLang].syncs.applied);
+  resultArea.innerHTML=`<div class="ai-empty-state"><div class="ai-icon">✓</div><div>${T[currentLang].appliedMsg}</div></div>`;
+  resultArea._data=null;
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+// ─────────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────────
+function openModal(type, id) {
+  modalType=type; editingId=id||null;
+  const L=T[currentLang];
+  let existing=null;
+  if(editingId) existing=type==='character'?state.characters.find(c=>c.id==editingId):state.events.find(e=>e.id==editingId);
+  const mk=(k)=>editingId?L.modals['edit'+k.charAt(0).toUpperCase()+k.slice(1)]:L.modals['new'+k.charAt(0).toUpperCase()+k.slice(1)];
+  const typeKey = type==='character'?'Char':type==='main'?'Main':type==='minor'?'Minor':'Connect';
+  document.getElementById('modal-title').textContent=mk(typeKey.toLowerCase()) || (editingId?'Edit':'New')+' '+type;
+  document.getElementById('btn-cancel').textContent=L.cancel;
+  document.getElementById('btn-save-modal').textContent=L.saveBtn;
+  const ph=L.ph;
+  if(type==='character'){
+    document.getElementById('modal-body').innerHTML=`
+      <div class="form-group"><label class="form-label">${L.fields.name}</label><input class="form-input" id="f-name" placeholder="${ph.charName}" value="${existing?.name||''}"></div>
+      <div class="form-group"><label class="form-label">${L.fields.role}</label><select class="form-select" id="f-role">${L.roles.map((r,i)=>`<option value="${r}" ${existing?.roleIdx==i?'selected':''}>${r}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">${L.fields.desc}</label><textarea class="form-textarea" id="f-desc" placeholder="${ph.desc}">${existing?.desc||''}</textarea></div>
+      <div class="form-group"><label class="form-label">${L.fields.motiv}</label><input class="form-input" id="f-motivation" placeholder="${ph.motiv}" value="${existing?.motivation||''}"></div>`;
+  } else {
+    const charOpts=state.characters.map(c=>`<option value="${c.id}" ${existing?.chars?.includes(c.id)?'selected':''}>${c.name}</option>`).join('');
+    document.getElementById('modal-body').innerHTML=`
+      <div class="form-group"><label class="form-label">${L.fields.evtTitle}</label><input class="form-input" id="f-name" placeholder="${ph.evtTitle}" value="${existing?.name||''}"></div>
+      <div class="form-group"><label class="form-label">${L.fields.evtDesc}</label><textarea class="form-textarea" id="f-desc" placeholder="${ph.evtDesc}">${existing?.desc||''}</textarea></div>
+      <div class="form-group"><label class="form-label">${L.fields.chars}</label><select class="form-select" id="f-chars" multiple size="3">${charOpts||`<option disabled>${currentLang==='ko'?'등장인물을 먼저 추가하세요':'Add characters first'}</option>`}</select></div>
+      <div class="form-group"><label class="form-label">${L.fields.chapter}</label><input class="form-input" id="f-chapter" placeholder="${ph.chapter}" value="${existing?.chapter||''}"></div>`;
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('f-name')?.focus(),100);
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');modalType=null;editingId=null;}
+function closeModalOverlay(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+function saveModal(){
+  const nameEl=document.getElementById('f-name'); const name=nameEl?.value?.trim();
+  if(!name){nameEl.style.borderColor='#ef4444';return;} nameEl.style.borderColor='';
+  if(modalType==='character'){
+    const roleEl=document.getElementById('f-role');
+    const roleIdx = roleEl?.selectedIndex||0;
+    const engRoles = ['Protagonist','Antagonist','Supporting','Narrator','Other'];
+    const obj={id:editingId||nextId++,type:'character',name,role:engRoles[roleIdx]||engRoles[0],roleIdx,desc:document.getElementById('f-desc')?.value?.trim(),motivation:document.getElementById('f-motivation')?.value?.trim()};
+    if(editingId){const i=state.characters.findIndex(c=>c.id==editingId);state.characters[i]=obj;}else state.characters.push(obj);
+  } else {
+    const selEl=document.getElementById('f-chars');
+    const chars=selEl?[...selEl.selectedOptions].map(o=>parseInt(o.value)):[];
+    const obj={id:editingId||nextId++,type:modalType,name,desc:document.getElementById('f-desc')?.value?.trim(),chars,chapter:document.getElementById('f-chapter')?.value?.trim()};
+    if(editingId){const i=state.events.findIndex(e=>e.id==editingId);state.events[i]=obj;}else state.events.push(obj);
+  }
+  closeModal(); renderBoard(); renderBoardAlt(); saveLocal();
+  markDocChanged();
+  showSync(T[currentLang].syncs[editingId?'updated':'created']);
+}
+
+// ─────────────────────────────────────────────────
+// BOARD RENDER
+// ─────────────────────────────────────────────────
+function makeCharCard(c){
+  const L = T[currentLang];
+  const roles = L.roles || ['Protagonist','Antagonist','Supporting','Narrator','Other'];
+  const engRoles = ['Protagonist','Antagonist','Supporting','Narrator','Other'];
+  let roleIdx = (c.roleIdx != null && c.roleIdx >= 0) ? c.roleIdx : Math.max(0, engRoles.indexOf(c.role));
+  const roleLabel = roles[Math.min(roleIdx, roles.length-1)] || roles[0];
+  const initials=c.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const grad=roleIdx===0?'linear-gradient(135deg,#2d6a4f,#1b4332)':roleIdx===1?'linear-gradient(135deg,#7c3aed,#1d4ed8)':'linear-gradient(135deg,#6b7280,#374151)';
+  const imgHtml = c.imageUrl
+    ? `<img class="card-img-thumb" src="${c.imageUrl}" onclick="openImgModalFromCard('character',${c.id})" title="Click to change image" alt="${c.name}">`
+    : `<button class="card-img-btn" onclick="openImgModalFromCard('character',${c.id})">🖼️ ${currentLang==='ko'?'이미지 추가':'Add Image'}</button>`;
+  return `<div class="card card-character" id="card-${c.id}" draggable="true" ondragstart="onDragStart(event,'${c.id}','chars-row')" ondragend="onDragEnd()">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div class="card-avatar" style="background:${grad}">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div class="card-header">
+          <span class="card-tag tag-character">${roleLabel}</span>
+          <div style="display:flex;gap:2px"><button class="card-menu-btn" onclick="openModal('character',${c.id})">✎</button><button class="card-del" onclick="deleteItem('character',${c.id})">✕</button></div>
+        </div>
+        <div class="card-name">${c.name}</div>
+        ${c.desc?`<div class="card-desc">${c.desc}</div>`:''}
+        ${c.motivation?`<div style="margin-top:6px;font-size:10px;color:var(--muted);font-style:italic">⚡ ${c.motivation}</div>`:''}
+      </div>
+    </div>
+    ${imgHtml}
+  </div>`;
+}
+function makeEventCard(ev,idx){
+  const L=T[currentLang];
+  const cfg={main:{cls:'card-main',tag:'tag-main',lbl:currentLang==='ko'?'주요 사건':'Main Event'},minor:{cls:'card-minor',tag:'tag-minor',lbl:currentLang==='ko'?'부수 사건':'Minor Event'},connect:{cls:'card-connect',tag:'tag-connect',lbl:currentLang==='ko'?'연결':'Connecting'}}[ev.type]||{cls:'card-main',tag:'tag-main',lbl:'Event'};
+  const charNames=(ev.chars||[]).map(cid=>{const c=state.characters.find(ch=>ch.id==cid);return c?`<span style="background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:1px 7px;font-size:9px;font-family:'DM Mono',monospace">${c.name}</span>`:''}).join('');
+  const imgHtml = ev.imageUrl
+    ? `<img class="card-img-thumb" src="${ev.imageUrl}" onclick="openImgModalFromCard('event',${ev.id})" title="Click to change image" alt="${ev.name}">`
+    : `<button class="card-img-btn" onclick="openImgModalFromCard('event',${ev.id})">🖼️ Add Image</button>`;
+  return `<div class="card ${cfg.cls}" id="card-${ev.id}" draggable="true"
+    ondragstart="onDragStart(event,'${ev.id}','events-row')" ondragend="onDragEnd()"
+    onclick="highlightEventInDoc(${ev.id}, event)"
+    style="cursor:pointer" title="${currentLang==='ko'?'클릭하여 문서에서 강조':'Click to highlight in document'}">
+    <div class="card-order-badge">${idx+1}</div>
+    <div class="card-header">
+      <span class="card-tag ${cfg.tag}">${cfg.lbl}</span>
+      <div style="display:flex;gap:2px;align-items:center">
+        <span style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;margin-right:4px" title="${currentLang==='ko'?'클릭: 문서에서 찾기':'Click: find in doc'}">🔍</span>
+        <button class="card-menu-btn" onclick="openModal('${ev.type}',${ev.id});event.stopPropagation()">✎</button>
+        <button class="card-del" onclick="deleteItem('event',${ev.id});event.stopPropagation()">✕</button>
+      </div>
+    </div>
+    <div class="card-name">${ev.name}</div>
+    ${ev.desc?`<div class="card-desc">${ev.desc}</div>`:''}
+    ${ev.chapter?`<div style="margin-top:6px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">📖 ${ev.chapter}</div>`:''}
+    ${charNames?`<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${charNames}</div>`:''}
+    ${imgHtml}
+  </div>`;
+}
+function renderBoard(){
+  const L=T[currentLang];
+  const cr=document.getElementById('chars-row'), er=document.getElementById('events-row');
+  if(cr) cr.innerHTML=state.characters.length?state.characters.map(c=>makeCharCard(c)).join(''):`<div class="empty-state">${L.emptyChars}</div>`;
+  if(er) er.innerHTML=state.events.length?state.events.map((ev,i)=>makeEventCard(ev,i)).join(''):`<div class="empty-state">${L.emptyEvents}</div>`;
+  renderArcTemplate('split');
+}
+function renderBoardAlt(){
+  const L=T[currentLang];
+  const c=document.getElementById('board-solo'); if(!c) return;
+  c.innerHTML=`
+    <div><div class="board-section-title">${L.secChars}</div>
+      <div class="cards-row" ondragover="onDragOver(event,'chars-row')" ondrop="onDrop(event,'chars-row')">
+        ${state.characters.length?state.characters.map(c=>makeCharCard(c)).join(''):`<div class="empty-state">${L.emptyChars}</div>`}
+      </div>
+    </div>
+    <div><div class="board-section-title">${L.secTimeline}</div>
+      <div class="cards-row" ondragover="onDragOver(event,'events-row')" ondrop="onDrop(event,'events-row')">
+        ${state.events.length?state.events.map((ev,i)=>makeEventCard(ev,i)).join(''):`<div class="empty-state">${L.emptyEvents}</div>`}
+      </div>
+    </div>`;
+  renderArcTemplate('solo');
+}
+function deleteItem(type,id){
+  if(type==='character') state.characters=state.characters.filter(c=>c.id!=id);
+  else state.events=state.events.filter(e=>e.id!=id);
+  renderBoard();renderBoardAlt();saveLocal();markDocChanged();showSync(T[currentLang].syncs.deleted);
+}
+
+// ─────────────────────────────────────────────────
+// DRAG & DROP
+// ─────────────────────────────────────────────────
+function onDragStart(e,id,rowId){dragSrcId=parseInt(id);dragSrcRow=rowId;e.dataTransfer.effectAllowed='move';setTimeout(()=>document.getElementById('card-'+id)?.classList.add('dragging'),0);}
+function onDragEnd(){document.querySelectorAll('.card').forEach(c=>{c.classList.remove('dragging');c.classList.remove('drag-over');});}
+function onDragOver(e,rowId){e.preventDefault();e.dataTransfer.dropEffect='move';const row=document.getElementById(rowId);if(!row)return;[...row.querySelectorAll('.card')].forEach(c=>{c.classList.remove('drag-over');const r=c.getBoundingClientRect();if(e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom)c.classList.add('drag-over');});}
+function onDrop(e,rowId){e.preventDefault();if(dragSrcRow!==rowId)return;const row=document.getElementById(rowId);if(!row)return;let tid=null;[...row.querySelectorAll('.card')].forEach(c=>{c.classList.remove('drag-over');const r=c.getBoundingClientRect();if(e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom)tid=parseInt(c.id.replace('card-',''));});if(tid!==null&&tid!==dragSrcId){const arr=rowId==='chars-row'?state.characters:state.events;const si=arr.findIndex(x=>x.id==dragSrcId),ti=arr.findIndex(x=>x.id==tid);if(si>=0&&ti>=0){const[it]=arr.splice(si,1);arr.splice(ti,0,it);}renderBoard();renderBoardAlt();saveLocal();markDocChanged();showSync(T[currentLang].syncs.reordered);}}
+
+// ─────────────────────────────────────────────────
+// SYNC
+// ─────────────────────────────────────────────────
+let syncTimer;
+function showSync(msg){const el=document.getElementById('sync-indicator');document.getElementById('sync-text').textContent=msg||'Synced';el.classList.add('show');clearTimeout(syncTimer);syncTimer=setTimeout(()=>el.classList.remove('show'),2000);}
+
+// ─────────────────────────────────────────────────
+// PERSIST
+// ─────────────────────────────────────────────────
+function saveLocal(){
+  try { localStorage.setItem('storyloom3', JSON.stringify({...state, nextId, lang:currentLang})); } catch(e){}
+  saveCurrentProjectData();
+}
+function loadLocal(){try{const raw=localStorage.getItem('storyloom3');if(!raw)return;const d=JSON.parse(raw);state.characters=d.characters||[];state.events=d.events||[];state.docContent=d.docContent||'';nextId=d.nextId||1;if(d.lang)currentLang=d.lang;editor.innerHTML=state.docContent;editor2.innerHTML=state.docContent;}catch(e){}}
+function saveAll(){
+  state.docContent = editor.innerHTML;
+  editor2.innerHTML = editor.innerHTML;
+  saveLocal();
+  clearSyncIndicator();
+  showSync(T[currentLang].syncs?.synced || 'Saved');
+}
+// ─────────────────────────────────────────────────
+// SAVE FILE DROPDOWN
+// ─────────────────────────────────────────────────
+function toggleSaveDropdown() {
+  const dd = document.getElementById('save-dropdown');
+  const open = dd.classList.contains('open');
+  dd.classList.toggle('open', !open);
+  if (!open) {
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', closeSaveDropdownOutside, { once: true });
+    }, 0);
+  }
+}
+function closeSaveDropdownOutside(e) {
+  const wrap = document.getElementById('save-dropdown-wrap');
+  if (!wrap.contains(e.target)) {
+    document.getElementById('save-dropdown').classList.remove('open');
+  } else {
+    document.addEventListener('click', closeSaveDropdownOutside, { once: true });
+  }
+}
+function closeSaveDropdown() {
+  document.getElementById('save-dropdown').classList.remove('open');
+}
+
+function getActiveProjectTitle() {
+  const projects = loadProjects();
+  const proj = projects.find(p => p.id === activeProjectId);
+  return proj ? proj.title.replace(/[^a-z0-9\s\-_]/gi, '').trim() || 'my-story' : 'my-story';
+}
+
+function buildSnapshot() {
+  // Ensure current state is fresh
+  state.docContent = editor.innerHTML;
+  saveCurrentProjectData(); // flush to localStorage first
+
+  const projects = loadProjects();
+  const projectData = projects.map(p => ({
+    id: p.id,
+    data: loadProjectData(p.id) || {}
+  }));
+  return {
+    projects,
+    projectData,
+    activeProjectId,
+    savedAt: Date.now()
+  };
+}
+
+async function saveAppToFile() {
+  // Save current state first
+  state.docContent = editor.innerHTML;
+  saveLocal();
+
+  const snapshot = buildSnapshot();
+  const snapshotJson = JSON.stringify(snapshot);
+
+  // Read current HTML, inject snapshot, download
+  showSync('📦 Packaging…');
+  try {
+    const res = await fetch(window.location.href);
+    let html = await res.text();
+
+    // Replace the snapshot tag content
+    html = html.replace(
+      /<script id="storyloom-snapshot"[^>]*>[\s\S]*?<\/script>/,
+      `<script id="storyloom-snapshot" type="application/json">${snapshotJson}<\/script>`
+    );
+
+    const projects = loadProjects();
+    const proj = projects.find(p => p.id === activeProjectId);
+    const title = proj ? proj.title.replace(/[^a-z0-9\s\-_]/gi,'').trim() : 'storyloom';
+    downloadBlob(html, `${title || 'storyloom'}.html`, 'text/html;charset=utf-8');
+    showSync('✓ App saved — all projects included');
+  } catch(e) {
+    // Fallback: build HTML from scratch if fetch fails (e.g. file:// origin)
+    const snapshotEl = document.getElementById('storyloom-snapshot');
+    if (snapshotEl) {
+      snapshotEl.textContent = snapshotJson;
+    }
+    // Serialize the whole page
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const projects = loadProjects();
+    const proj = projects.find(p => p.id === activeProjectId);
+    const title = proj ? proj.title.replace(/[^a-z0-9\s\-_]/gi,'').trim() : 'storyloom';
+    downloadBlob(html, `${title || 'storyloom'}.html`, 'text/html;charset=utf-8');
+    showSync('✓ App saved');
+  }
+}
+
+function saveAsFile(format) {
+  closeSaveDropdown();
+  const title = getActiveProjectTitle();
+  const docEl = editor;
+
+  if (format === 'app') {
+    saveAppToFile();
+    return;
+  }
+
+  if (format === 'txt') {
+    const text = docEl.innerText || '';
+    downloadBlob(text, `${title}.txt`, 'text/plain;charset=utf-8');
+
+  } else if (format === 'md') {
+    // Convert HTML to rough markdown
+    let md = docEl.innerHTML
+      .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
+      .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
+      .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n')
+      .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+      .replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**')
+      .replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+      .replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+      .replace(/<div[^>]*>(.*?)<\/div>/gi, '$1\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ')
+      .replace(/\n{3,}/g, '\n\n').trim();
+    downloadBlob(`# ${title}\n\n` + md, `${title}.md`, 'text/markdown;charset=utf-8');
+
+  } else if (format === 'html') {
+    const htmlOut = `<!DOCTYPE html>
+<html lang="${currentLang}">
+<head>
+<meta charset="UTF-8">
+<title>${title}</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 720px; margin: 60px auto; font-size: 18px; line-height: 1.9; color: #1c2b1a; background: #fffef7; padding: 0 32px; }
+  h1 { font-size: 2em; margin-bottom: .5em; }
+  h2 { font-size: 1.5em; margin: 1.5em 0 .5em; }
+  p { margin-bottom: 1em; }
+</style>
+</head>
+<body>
+${docEl.innerHTML}
+</body>
+</html>`;
+    downloadBlob(htmlOut, `${title}-doc.html`, 'text/html;charset=utf-8');
+  }
+}
+
+function downloadBlob(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  showSync('✓ ' + filename);
+}
+
+// ─────────────────────────────────────────────────
+// GOOGLE DRIVE INTEGRATION
+// Uses Google Identity Services (GIS) + Drive API v3
+// ─────────────────────────────────────────────────
+const GDRIVE_CLIENT_ID = ''; // User must supply — see instructions below
+const GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
+let gdriveToken = null;
+let gdriveTokenExpiry = 0;
+
+function isGdriveReady() {
+  return typeof google !== 'undefined' && google.accounts;
+}
+
+function saveToGoogleDrive() {
+  closeSaveDropdown();
+  if (!GDRIVE_CLIENT_ID) {
+    showGdriveSetupModal();
+    return;
+  }
+  if (gdriveToken && Date.now() < gdriveTokenExpiry) {
+    doGdriveSave();
+  } else {
+    requestGdriveToken();
+  }
+}
+
+function requestGdriveToken() {
+  if (!isGdriveReady()) {
+    // Load GIS script dynamically
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.onload = () => requestGdriveToken();
+    script.onerror = () => showSync('⚠ Could not load Google Sign-In');
+    document.head.appendChild(script);
+    return;
+  }
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: GDRIVE_CLIENT_ID,
+    scope: GDRIVE_SCOPES,
+    callback: (resp) => {
+      if (resp.error) { showSync('⚠ Google sign-in failed'); return; }
+      gdriveToken = resp.access_token;
+      gdriveTokenExpiry = Date.now() + (resp.expires_in - 60) * 1000;
+      // Update UI
+      document.getElementById('gdrive-status').textContent = 'Signed in — saving…';
+      document.getElementById('gdrive-badge').style.display = 'inline';
+      doGdriveSave();
+    },
+  });
+  client.requestAccessToken({ prompt: '' });
+}
+
+async function doGdriveSave() {
+  const title = getActiveProjectTitle();
+  const filename = `${title}.html`;
+  const docEl = editor;
+  const htmlContent = `<!DOCTYPE html>
+<html lang="${currentLang}">
+<head><meta charset="UTF-8"><title>${title}</title>
+<style>body{font-family:Georgia,serif;max-width:720px;margin:60px auto;font-size:18px;line-height:1.9;color:#1c2b1a;background:#fffef7;padding:0 32px;}h1{font-size:2em;margin-bottom:.5em;}h2{font-size:1.5em;margin:1.5em 0 .5em;}p{margin-bottom:1em;}</style>
+</head><body>${docEl.innerHTML}</body></html>`;
+
+  showSync('☁ Saving to Drive…');
+
+  try {
+    // Check if file already exists (by name in appDataFolder or root)
+    const searchRes = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=name%3D'${encodeURIComponent(filename)}'%20and%20trashed%3Dfalse&fields=files(id,name)`,
+      { headers: { Authorization: `Bearer ${gdriveToken}` } }
+    );
+    const searchData = await searchRes.json();
+    const existing = searchData.files && searchData.files[0];
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const metadata = { name: filename, mimeType: 'text/html' };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', blob);
+
+    let uploadRes;
+    if (existing) {
+      // Update existing file
+      uploadRes = await fetch(
+        `https://www.googleapis.com/upload/drive/v3/files/${existing.id}?uploadType=multipart`,
+        { method: 'PATCH', headers: { Authorization: `Bearer ${gdriveToken}` }, body: form }
+      );
+    } else {
+      // Create new file
+      uploadRes = await fetch(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+        { method: 'POST', headers: { Authorization: `Bearer ${gdriveToken}` }, body: form }
+      );
+    }
+
+    if (uploadRes.ok) {
+      const fileData = await uploadRes.json();
+      document.getElementById('gdrive-status').textContent = `Saved: ${filename}`;
+      showSync(`✓ Saved to Google Drive`);
+    } else {
+      throw new Error(uploadRes.status);
+    }
+  } catch(err) {
+    showSync('⚠ Drive save failed — try again');
+    gdriveToken = null; // Force re-auth next time
+  }
+}
+
+function showGdriveSetupModal() {
+  const L = currentLang;
+  // Show a friendly instructions modal
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(28,43,26,.55);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)';
+  overlay.innerHTML = `
+    <div style="background:var(--cream);border-radius:16px;padding:36px 40px;width:520px;max-width:96vw;box-shadow:0 24px 64px rgba(0,0,0,.25);border:1px solid var(--border)">
+      <div style="font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px;color:var(--ink)">Connect Google Drive</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:24px;font-family:'DM Mono',monospace;line-height:1.6">
+        To enable Drive saving, a free Google Cloud OAuth Client ID is required.<br>It takes about 3 minutes to set up.
+      </div>
+      <div style="background:var(--paper);border:1.5px solid var(--border);border-radius:10px;padding:18px 20px;font-size:13px;color:var(--slate);line-height:1.8;font-family:'DM Sans',sans-serif">
+        <b>Steps:</b><br>
+        1. Go to <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent)">console.cloud.google.com</a><br>
+        2. Create a project → APIs &amp; Services → Credentials<br>
+        3. Create <b>OAuth 2.0 Client ID</b> → Web Application<br>
+        4. Add your file's URL to <b>Authorized JavaScript Origins</b><br>
+        5. Copy your Client ID and paste it into this file:<br>
+        <code style="background:var(--warm-mid);padding:2px 6px;border-radius:4px;font-size:12px">const GDRIVE_CLIENT_ID = '<b>YOUR_ID_HERE</b>';</code><br>
+        6. Also enable the <b>Google Drive API</b> in the library
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:20px">
+        <button onclick="this.closest('div[style]').remove()" style="padding:10px 22px;border-radius:8px;border:none;background:var(--accent);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Got it</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+function exportDoc(){ saveAsFile('txt'); } // keep legacy reference working
+
+// ─────────────────────────────────────────────────
+// DIVIDER
+// ─────────────────────────────────────────────────
+const divider=document.getElementById('divider');
+let isResizing=false;
+divider.addEventListener('mousedown',()=>{isResizing=true;divider.classList.add('dragging');document.body.style.cursor='col-resize';document.body.style.userSelect='none';});
+document.addEventListener('mousemove',e=>{if(!isResizing)return;const split=document.getElementById('panel-split');const rect=split.getBoundingClientRect();const pct=Math.max(25,Math.min(72,((e.clientX-rect.left)/rect.width)*100));document.getElementById('doc-pane').style.flex='none';document.getElementById('doc-pane').style.width=pct+'%';document.getElementById('board-pane').style.flex='1';});
+document.addEventListener('mouseup',()=>{if(isResizing){isResizing=false;divider.classList.remove('dragging');document.body.style.cursor='';document.body.style.userSelect='';}});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveAll();}});
+
+// ─────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────
+// Init is handled by initProjects() below (after projects code)
+document.body.className = 'lang-' + currentLang;
+renderToolbars();
+applyLang();
+updateWordCount();
+// ─────────────────────────────────────────────────
+// IMAGE UPLOAD
+// ─────────────────────────────────────────────────
+let imgCtx = { type: null, id: null };
+let imgCurrentDataUrl = '';
+
+function openImgModalFromCard(type, id) {
+  const item = type === 'character'
+    ? state.characters.find(c => c.id == id)
+    : state.events.find(e => e.id == id);
+  if (!item) return;
+  imgCtx = { type, id };
+  const L = currentLang;
+  const label = type === 'character'
+    ? `${L==='ko'?'등장인물':'Character'}: ${item.name}`
+    : `${L==='ko'?'사건':'Event'}: ${item.name}`;
+  openImgModal(label, item.imageUrl || '');
+}
+
+function openImgModalFromDoc() {
+  // No-op for doc — just open modal for a free upload
+  imgCtx = { type: 'doc', id: null };
+  openImgModal(currentLang==='ko'?'문서용 이미지':'Document Image', '');
+}
+
+function openImgModal(titleText, existingUrl) {
+  const L = currentLang;
+  document.getElementById('img-modal-title-text').textContent = L==='ko'?'이미지 추가':'Add Image';
+  document.getElementById('img-dz-text').textContent = L==='ko'?'클릭하여 이미지 선택':'Click to choose an image';
+  document.getElementById('img-dz-sub').textContent = L==='ko'?'또는 드래그 앤 드롭 · JPG, PNG, GIF, WEBP':'or drag and drop · JPG, PNG, GIF, WEBP';
+  document.getElementById('img-clear-btn').textContent = `✕ ${L==='ko'?'제거':'Remove'}`;
+  document.getElementById('img-save-btn').innerHTML = `💾 ${L==='ko'?'카드에 저장':'Save to Card'}`;
+  document.getElementById('img-saved-banner').style.display = 'none';
+  document.getElementById('img-file-input').value = '';
+
+  // Reset save button style
+  const sb = document.getElementById('img-save-btn');
+  sb.className = 'img-action-btn primary';
+
+  if (existingUrl) {
+    imgCurrentDataUrl = existingUrl;
+    showImgPreview(existingUrl);
+  } else {
+    imgCurrentDataUrl = '';
+    document.getElementById('img-preview-wrap').classList.remove('show');
+  }
+  document.getElementById('img-modal-overlay').classList.add('open');
+}
+
+function closeImgModal() { document.getElementById('img-modal-overlay').classList.remove('open'); }
+function closeImgModalOverlay(e) { if (e.target === document.getElementById('img-modal-overlay')) closeImgModal(); }
+
+function imgFileChosen(e) {
+  const file = e.target.files[0];
+  if (file) imgReadFile(file);
+}
+
+function imgDragOver(e) {
+  e.preventDefault();
+  document.getElementById('img-dropzone').classList.add('drag-over');
+}
+function imgDragLeave(e) {
+  document.getElementById('img-dropzone').classList.remove('drag-over');
+}
+function imgDrop(e) {
+  e.preventDefault();
+  document.getElementById('img-dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) imgReadFile(file);
+}
+
+function imgReadFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imgCurrentDataUrl = e.target.result;
+    showImgPreview(imgCurrentDataUrl);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showImgPreview(dataUrl) {
+  document.getElementById('img-preview').src = dataUrl;
+  document.getElementById('img-preview-wrap').classList.add('show');
+  document.getElementById('img-saved-banner').style.display = 'none';
+  const sb = document.getElementById('img-save-btn');
+  sb.className = 'img-action-btn primary';
+  sb.innerHTML = `💾 ${currentLang==='ko'?'카드에 저장':'Save to Card'}`;
+}
+
+function imgClear() {
+  imgCurrentDataUrl = '';
+  document.getElementById('img-preview').src = '';
+  document.getElementById('img-preview-wrap').classList.remove('show');
+  document.getElementById('img-file-input').value = '';
+  document.getElementById('img-saved-banner').style.display = 'none';
+}
+
+function imgSaveToCard() {
+  const L = currentLang;
+  if (!imgCurrentDataUrl) {
+    showSync(L==='ko'?'먼저 이미지를 선택하세요':'Choose an image first');
+    return;
+  }
+  if (!imgCtx.id) { closeImgModal(); return; }
+
+  if (imgCtx.type === 'character') {
+    const c = state.characters.find(x => x.id == imgCtx.id);
+    if (c) c.imageUrl = imgCurrentDataUrl;
+  } else {
+    const ev = state.events.find(x => x.id == imgCtx.id);
+    if (ev) ev.imageUrl = imgCurrentDataUrl;
+  }
+
+  saveLocal(); renderBoard(); renderBoardAlt();
+
+  const sb = document.getElementById('img-save-btn');
+  sb.className = 'img-action-btn success';
+  sb.innerHTML = `✓ ${L==='ko'?'저장됨!':'Saved!'}`;
+
+  const banner = document.getElementById('img-saved-banner');
+  banner.textContent = L==='ko'?'✓ 이미지가 카드에 저장되었습니다!':'✓ Image saved to card!';
+  banner.style.display = 'block';
+
+  showSync(L==='ko'?'이미지 저장됨 ✓':'Image saved ✓');
+
+  setTimeout(() => {
+    sb.className = 'img-action-btn primary';
+    sb.innerHTML = `💾 ${L==='ko'?'카드에 저장':'Save to Card'}`;
+  }, 2500);
+}
+
+// ─────────────────────────────────────────────────
+// ─────────────────────────────────────────────────
+// Uses SHA-256 hashing via Web Crypto — password never stored raw
+// ─────────────────────────────────────────────────
+const PW_KEY = 'storyloom_pw_hash';
+const SESSION_KEY = 'storyloom_session';
+
+async function hashPassword(pw) {
+  const enc = new TextEncoder().encode(pw + '::storyloom::salt');
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function getStoredHash() { return localStorage.getItem(PW_KEY) || null; }
+function hasPassword() { return !!getStoredHash(); }
+function isSessionUnlocked() { return sessionStorage.getItem(SESSION_KEY) === 'unlocked'; }
+function markSessionUnlocked() { sessionStorage.setItem(SESSION_KEY, 'unlocked'); }
+
+async function initLockScreen() {
+  const screen = document.getElementById('lock-screen');
+  // If no password set, show setup prompt
+  if (!hasPassword()) {
+    document.getElementById('lock-enter-view').style.display = 'none';
+    document.getElementById('lock-setup-view').style.display = 'block';
+    document.getElementById('lock-subtitle').textContent = 'Set a password to protect your writing';
+    screen.classList.remove('hidden');
+    setTimeout(() => document.getElementById('lock-new-input')?.focus(), 400);
+    return;
+  }
+  // Password exists — if already unlocked in this tab session, skip
+  if (isSessionUnlocked()) {
+    screen.classList.add('hidden');
+    return;
+  }
+  // Show unlock form
+  document.getElementById('lock-enter-view').style.display = 'block';
+  document.getElementById('lock-setup-view').style.display = 'none';
+  document.getElementById('lock-subtitle').textContent = 'Your private novel workspace';
+  screen.classList.remove('hidden');
+  setTimeout(() => document.getElementById('lock-pw-input')?.focus(), 400);
+}
+
+async function submitLockPassword() {
+  const input = document.getElementById('lock-pw-input');
+  const errEl = document.getElementById('lock-error');
+  const pw = input.value;
+  if (!pw) { errEl.textContent = currentLang==='ko'?'비밀번호를 입력하세요.':'Please enter your password.'; input.classList.add('error'); setTimeout(()=>input.classList.remove('error'),500); return; }
+  const hash = await hashPassword(pw);
+  if (hash === getStoredHash()) {
+    markSessionUnlocked();
+    updateLockButton(true);
+    document.getElementById('lock-screen').classList.add('hidden');
+    input.value = '';
+    errEl.textContent = '';
+    initProjects();
+  } else {
+    errEl.textContent = currentLang==='ko'?'잘못된 비밀번호입니다.':'Incorrect password. Please try again.';
+    input.classList.add('error');
+    input.value = '';
+    setTimeout(()=>{ input.classList.remove('error'); input.focus(); }, 500);
+  }
+}
+
+async function submitSetupPassword() {
+  const newInput = document.getElementById('lock-new-input');
+  const confirmInput = document.getElementById('lock-confirm-input');
+  const errEl = document.getElementById('lock-setup-error');
+  const pw = newInput.value;
+  const confirm = confirmInput.value;
+  if (pw.length < 4) { errEl.textContent = currentLang==='ko'?'4자 이상 입력하세요.':'Password must be at least 4 characters.'; newInput.classList.add('error'); setTimeout(()=>newInput.classList.remove('error'),500); return; }
+  if (pw !== confirm) { errEl.textContent = currentLang==='ko'?'비밀번호가 일치하지 않습니다.':'Passwords do not match.'; confirmInput.classList.add('error'); setTimeout(()=>confirmInput.classList.remove('error'),500); return; }
+  const hash = await hashPassword(pw);
+  localStorage.setItem(PW_KEY, hash);
+  markSessionUnlocked();
+  updateLockButton(true);
+  document.getElementById('lock-screen').classList.add('hidden');
+  newInput.value = ''; confirmInput.value = ''; errEl.textContent = '';
+  initProjects();
+}
+
+function skipPassword() {
+  localStorage.removeItem(PW_KEY);
+  markSessionUnlocked();
+  updateLockButton(false);
+  document.getElementById('lock-screen').classList.add('hidden');
+  initProjects();
+}
+
+function lockNow() {
+  sessionStorage.removeItem(SESSION_KEY);
+  // Re-show lock screen
+  document.getElementById('lock-pw-input').value = '';
+  document.getElementById('lock-error').textContent = '';
+  document.getElementById('lock-enter-view').style.display = 'block';
+  document.getElementById('lock-setup-view').style.display = 'none';
+  document.getElementById('lock-screen').classList.remove('hidden');
+  setTimeout(() => document.getElementById('lock-pw-input')?.focus(), 300);
+}
+
+function updateLockButton(isProtected) {
+  const btn = document.getElementById('btn-lock');
+  const icon = document.getElementById('lock-icon');
+  const lbl = document.getElementById('btn-lock-label');
+  if (!btn) return;
+  if (isProtected) {
+    btn.classList.add('protected');
+    icon.textContent = '🔒';
+    lbl.textContent = currentLang==='ko'?'잠금':'Lock';
+  } else {
+    btn.classList.remove('protected');
+    icon.textContent = '🔓';
+    lbl.textContent = currentLang==='ko'?'잠금 설정':'Set Lock';
+  }
+}
+
+// Password settings modal
+function openPwModal() {
+  const overlay = document.getElementById('pw-modal-overlay');
+  const body = document.getElementById('pw-modal-body');
+  const title = document.getElementById('pw-modal-title');
+  const L = currentLang;
+  title.textContent = L==='ko'?'🔒 비밀번호 보호':'🔒 Password Protection';
+  const protected_ = hasPassword();
+
+  body.innerHTML = `
+    <div class="pw-section">
+      <div class="pw-section-title">${L==='ko'?'현재 상태':'Current Status'}</div>
+      <div class="pw-status">
+        <div class="pw-dot ${protected_?'on':''}"></div>
+        <span>${protected_ ? (L==='ko'?'비밀번호 보호 중':'Password protection is ON') : (L==='ko'?'비밀번호 없음':'No password set')}</span>
+      </div>
+      ${protected_ ? `<button class="btn-danger" onclick="confirmRemovePassword()">${L==='ko'?'비밀번호 제거':'Remove Password'}</button>` : ''}
+    </div>
+    <div class="pw-section">
+      <div class="pw-section-title">${protected_ ? (L==='ko'?'비밀번호 변경':'Change Password') : (L==='ko'?'비밀번호 설정':'Set a Password')}</div>
+      ${protected_ ? `<div class="form-group"><label class="form-label">${L==='ko'?'현재 비밀번호':'Current Password'}</label><input class="form-input" type="password" id="pw-current" placeholder="${L==='ko'?'현재 비밀번호':'Current password'}"></div>` : ''}
+      <div class="form-group"><label class="form-label">${L==='ko'?'새 비밀번호':'New Password'}</label><input class="form-input" type="password" id="pw-new" placeholder="${L==='ko'?'4자 이상':'At least 4 characters'}" oninput="updateModalStrength()"></div>
+      <div class="strength-bar"><div class="strength-fill" id="modal-strength-fill"></div></div>
+      <div class="form-group"><label class="form-label">${L==='ko'?'비밀번호 확인':'Confirm New Password'}</label><input class="form-input" type="password" id="pw-confirm" placeholder="${L==='ko'?'다시 입력':'Repeat password'}"></div>
+      <div style="color:#ef4444;font-size:12px;min-height:18px;margin-bottom:12px" id="pw-change-error"></div>
+      <button class="btn btn-save" style="width:100%;padding:10px" onclick="submitChangePassword()">${protected_?(L==='ko'?'비밀번호 변경':'Change Password'):(L==='ko'?'비밀번호 설정':'Set Password')}</button>
+    </div>
+    ${protected_ ? `<div class="pw-section"><div class="pw-section-title">${L==='ko'?'잠금':'Lock'}</div><button class="btn btn-accent" style="width:100%;padding:10px" onclick="lockNow();closePwModal()">${L==='ko'?'지금 잠금':'Lock Now'}</button></div>` : ''}
+  `;
+  overlay.classList.add('open');
+}
+
+function closePwModal() { document.getElementById('pw-modal-overlay').classList.remove('open'); }
+function closePwModalOverlay(e) { if(e.target===document.getElementById('pw-modal-overlay')) closePwModal(); }
+
+async function submitChangePassword() {
+  const currentEl = document.getElementById('pw-current');
+  const newEl = document.getElementById('pw-new');
+  const confirmEl = document.getElementById('pw-confirm');
+  const errEl = document.getElementById('pw-change-error');
+  const L = currentLang;
+
+  if (hasPassword() && currentEl) {
+    const currentHash = await hashPassword(currentEl.value);
+    if (currentHash !== getStoredHash()) {
+      errEl.textContent = L==='ko'?'현재 비밀번호가 틀렸습니다.':'Current password is incorrect.';
+      currentEl.classList.add('error'); setTimeout(()=>currentEl.classList.remove('error'),500);
+      return;
+    }
+  }
+  const pw = newEl?.value || '';
+  if (pw.length < 4) { errEl.textContent = L==='ko'?'4자 이상 입력하세요.':'Password must be at least 4 characters.'; newEl.classList.add('error'); setTimeout(()=>newEl.classList.remove('error'),500); return; }
+  if (pw !== confirmEl?.value) { errEl.textContent = L==='ko'?'비밀번호가 일치하지 않습니다.':'Passwords do not match.'; confirmEl.classList.add('error'); setTimeout(()=>confirmEl.classList.remove('error'),500); return; }
+  const hash = await hashPassword(pw);
+  localStorage.setItem(PW_KEY, hash);
+  markSessionUnlocked();
+  updateLockButton(true);
+  closePwModal();
+  showSync(L==='ko'?'비밀번호 설정됨 ✓':'Password set ✓');
+}
+
+async function confirmRemovePassword() {
+  const L = currentLang;
+  const pw = prompt(L==='ko'?'현재 비밀번호를 입력하여 제거하세요:':'Enter current password to remove protection:');
+  if (pw === null) return; // cancelled
+  const hash = await hashPassword(pw);
+  if (hash === getStoredHash()) {
+    localStorage.removeItem(PW_KEY);
+    updateLockButton(false);
+    closePwModal();
+    showSync(L==='ko'?'비밀번호 제거됨':'Password removed');
+  } else {
+    alert(L==='ko'?'잘못된 비밀번호입니다.':'Incorrect password.');
+  }
+}
+
+function updateStrength() {
+  const pw = document.getElementById('lock-new-input')?.value || '';
+  updateStrengthBar(pw, 'strength-fill');
+}
+function updateModalStrength() {
+  const pw = document.getElementById('pw-new')?.value || '';
+  updateStrengthBar(pw, 'modal-strength-fill');
+}
+function updateStrengthBar(pw, fillId) {
+  const el = document.getElementById(fillId); if(!el) return;
+  let score = 0;
+  if (pw.length >= 4) score++;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^a-zA-Z0-9]/.test(pw)) score++;
+  const pct = (score / 5) * 100;
+  const colors = ['#ef4444','#f59e0b','#a3b18a','#52b788','#1b4332'];
+  el.style.width = pct + '%';
+  el.style.background = colors[Math.max(0,score-1)] || '#d1d5db';
+}
+
+// Enter key on lock inputs
+document.getElementById('lock-pw-input').addEventListener('keydown', e=>{ if(e.key==='Enter') submitLockPassword(); });
+document.getElementById('lock-new-input').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('lock-confirm-input')?.focus(); });
+document.getElementById('lock-confirm-input').addEventListener('keydown', e=>{ if(e.key==='Enter') submitSetupPassword(); });
+
+// ─────────────────────────────────────────────────
+// MULTI-PROJECT MANAGEMENT
+// ─────────────────────────────────────────────────
+const PROJECTS_KEY = 'storyloom_projects';
+const ACTIVE_PROJ_KEY = 'storyloom_active_project';
+let activeProjectId = null;
+let selectedProjEmoji = '📖';
+
+function loadProjects() {
+  try { return JSON.parse(localStorage.getItem(PROJECTS_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveProjects(projects) {
+  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+}
+
+function getProjectStorageKey(id) { return `storyloom3_proj_${id}`; }
+
+function showHome() {
+  // Save current project first
+  if (activeProjectId) {
+    state.docContent = editor.innerHTML;
+    saveCurrentProjectData();
+  }
+  renderProjectsGrid();
+  document.getElementById('home-screen').classList.add('open');
+}
+
+function hideHome() {
+  document.getElementById('home-screen').classList.remove('open');
+}
+
+function saveCurrentProjectData() {
+  if (!activeProjectId) return;
+  const projData = {
+    docContent: state.docContent,
+    characters: state.characters,
+    events: state.events,
+    nextId,
+    lang: currentLang,
+    lastSaved: Date.now(),
+    wordCount: (editor.innerText||'').trim().split(/\s+/).filter(Boolean).length,
+  };
+  localStorage.setItem(getProjectStorageKey(activeProjectId), JSON.stringify(projData));
+  // Update project meta
+  const projects = loadProjects();
+  const proj = projects.find(p => p.id === activeProjectId);
+  if (proj) {
+    proj.lastSaved = Date.now();
+    proj.wordCount = projData.wordCount;
+    proj.charCount = state.characters.length;
+    proj.eventCount = state.events.length;
+    saveProjects(projects);
+  }
+}
+
+function loadProjectData(projectId) {
+  try {
+    const raw = localStorage.getItem(getProjectStorageKey(projectId));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function openProject(projectId) {
+  const projects = loadProjects();
+  const proj = projects.find(p => p.id === projectId);
+  if (!proj) return;
+
+  activeProjectId = projectId;
+  localStorage.setItem(ACTIVE_PROJ_KEY, projectId);
+  document.title = `${proj.emoji} ${proj.title} — Storyloom`;
+  const nameEl = document.getElementById('active-proj-name');
+  if (nameEl) nameEl.textContent = `${proj.emoji} ${proj.title}`;
+
+  // Load project data
+  const data = loadProjectData(projectId);
+  if (data) {
+    state.characters = data.characters || [];
+    state.events = data.events || [];
+    state.docContent = data.docContent || '';
+    nextId = data.nextId || 1;
+    const lang = data.lang || 'en';
+    currentLang = lang;
+    document.body.className = 'lang-' + lang;
+    document.getElementById('lang-en').classList.toggle('active', lang==='en');
+    document.getElementById('lang-ko').classList.toggle('active', lang==='ko');
+    applyLang();
+  } else {
+    state.characters = [];
+    state.events = [];
+    state.docContent = '';
+    nextId = 1;
+  }
+
+  if (!state.docContent) {
+    const L = T[currentLang];
+    editor.innerHTML = `<h1>${L.starterH1}</h1><p>${L.starterP}</p>`;
+  } else {
+    editor.innerHTML = state.docContent;
+  }
+  editor2.innerHTML = editor.innerHTML;
+  state.docContent = editor.innerHTML;
+
+  renderBoard();
+  renderBoardAlt();
+  updateWordCount();
+  hideHome();
+  showSync(`📖 ${proj.title}`);
+}
+
+function renderProjectsGrid() {
+  const L = currentLang;
+  const projects = loadProjects();
+  const grid = document.getElementById('projects-grid');
+
+  document.getElementById('home-tagline').textContent = L==='ko' ? '나만의 창작 글쓰기 공간' : 'Your creative writing workspace';
+  document.getElementById('home-new-title').textContent = L==='ko' ? '새 프로젝트 시작' : 'Start a New Project';
+  document.getElementById('home-new-sub').textContent = L==='ko' ? '새 소설, 단편, 또는 글쓰기 프로젝트 만들기' : 'Begin a new novel, story, or writing project';
+  document.getElementById('home-proj-label').textContent = L==='ko' ? '내 프로젝트' : 'Your Projects';
+
+  if (projects.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;">
+      <div style="font-size:40px;margin-bottom:12px;opacity:.4">📖</div>
+      <div>${L==='ko'?'아직 프로젝트가 없습니다. 위 버튼으로 시작하세요!':'No projects yet. Create one above to get started!'}</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = projects.map(proj => {
+    const date = new Date(proj.createdAt);
+    const dateStr = date.toLocaleDateString(L==='ko'?'ko-KR':'en-US', { year:'numeric', month:'short', day:'numeric' });
+    const lastSaved = proj.lastSaved
+      ? new Date(proj.lastSaved).toLocaleDateString(L==='ko'?'ko-KR':'en-US', { month:'short', day:'numeric' })
+      : '—';
+    const isActive = proj.id === activeProjectId;
+    const spineColor = proj.color || 'var(--accent)';
+    return `<div class="project-card" onclick="openProject('${proj.id}')">
+      <div class="project-card-spine" style="background:${spineColor}"></div>
+      <div class="project-card-inner">
+        <div class="project-emoji">${proj.emoji||'📖'}</div>
+        <div class="project-title">${proj.title}${isActive ? ' <span style="font-size:10px;color:var(--accent);font-family:DM Mono,monospace;font-style:normal;font-weight:400">← current</span>' : ''}</div>
+        <div class="project-meta">
+          <span>Created ${dateStr}</span>
+          <span>Last saved ${lastSaved}</span>
+        </div>
+        <div class="project-stats">
+          <span class="project-stat">📝 ${proj.wordCount||0} words</span>
+          <span class="project-stat">👤 ${proj.charCount||0}</span>
+          <span class="project-stat">📌 ${proj.eventCount||0}</span>
+        </div>
+      </div>
+      <div class="project-actions">
+        <button class="project-open-btn" onclick="openProject('${proj.id}');event.stopPropagation()">${L==='ko'?'열기':'Open'}</button>
+        <button class="project-del-btn" onclick="deleteProject('${proj.id}',event)" title="${L==='ko'?'삭제':'Delete'}">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openNewProjectModal() {
+  document.getElementById('new-proj-overlay').classList.add('open');
+  document.getElementById('npj-name-input').value = '';
+  document.getElementById('npj-name-input').focus();
+  selectedProjEmoji = '📖';
+  document.querySelectorAll('.emoji-opt').forEach(b => b.classList.toggle('selected', b.dataset.emoji === '📖'));
+}
+
+function closeNewProjModal() {
+  document.getElementById('new-proj-overlay').classList.remove('open');
+}
+
+function closeNewProjOverlay(e) {
+  if (e.target === document.getElementById('new-proj-overlay')) closeNewProjModal();
+}
+
+function selectProjEmoji(btn) {
+  document.querySelectorAll('.emoji-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedProjEmoji = btn.dataset.emoji;
+}
+
+function createNewProject() {
+  const title = document.getElementById('npj-name-input').value.trim() || 'Untitled Project';
+  const spineColors = ['#2d6a4f','#5c6bc0','#b45309','#0284c7','#7c3aed','#16a34a','#dc2626','#0891b2'];
+  const projects = loadProjects();
+  const id = 'proj_' + Date.now();
+  const newProj = {
+    id,
+    title,
+    emoji: selectedProjEmoji,
+    createdAt: Date.now(),
+    lastSaved: null,
+    wordCount: 0,
+    charCount: 0,
+    eventCount: 0,
+    color: spineColors[projects.length % spineColors.length],
+  };
+  projects.unshift(newProj);
+  saveProjects(projects);
+  closeNewProjModal();
+  openProject(id);
+}
+
+function deleteProject(projectId, e) {
+  e.stopPropagation();
+  const L = currentLang;
+  const projects = loadProjects();
+  const proj = projects.find(p => p.id === projectId);
+  if (!proj) return;
+  if (!confirm(`${L==='ko'?`"${proj.title}" 프로젝트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`:`Delete "${proj.title}"? This cannot be undone.`}`)) return;
+  const updated = projects.filter(p => p.id !== projectId);
+  saveProjects(updated);
+  localStorage.removeItem(getProjectStorageKey(projectId));
+  if (activeProjectId === projectId) {
+    activeProjectId = null;
+    localStorage.removeItem(ACTIVE_PROJ_KEY);
+  }
+  renderProjectsGrid();
+}
+
+// Enter key in new project input
+document.getElementById('npj-name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') createNewProject();
+});
+
+// ── BOOT: decide whether to show home or jump into last project ──
+let _projectsInitialized = false;
+function initProjects() {
+  if (_projectsInitialized) return;
+  _projectsInitialized = true;
+
+  // ── Try to seed from embedded snapshot (downloaded HTML file) ──
+  try {
+    const snapshotEl = document.getElementById('storyloom-snapshot');
+    const snapshot = snapshotEl ? JSON.parse(snapshotEl.textContent) : null;
+    if (snapshot && snapshot.projects && snapshot.projects.length > 0) {
+      // Only seed localStorage if it looks empty / different origin
+      const existingProjects = loadProjects();
+      if (existingProjects.length === 0) {
+        saveProjects(snapshot.projects);
+        // Restore each project's data into localStorage
+        (snapshot.projectData || []).forEach(pd => {
+          localStorage.setItem(getProjectStorageKey(pd.id), JSON.stringify(pd.data));
+        });
+        if (snapshot.activeProjectId) {
+          localStorage.setItem(ACTIVE_PROJ_KEY, snapshot.activeProjectId);
+        }
+      }
+    }
+  } catch(e) { console.warn('Snapshot read failed:', e); }
+
+  const projects = loadProjects();
+  const lastId = localStorage.getItem(ACTIVE_PROJ_KEY);
+
+  if (projects.length === 0) {
+    // First ever use — create a default project from whatever is in storyloom3
+    const legacy = (() => { try { return JSON.parse(localStorage.getItem('storyloom3')); } catch(e) { return null; } })();
+    const defaultProj = {
+      id: 'proj_default',
+      title: 'My First Story',
+      emoji: '📖',
+      createdAt: Date.now(),
+      lastSaved: legacy ? Date.now() : null,
+      wordCount: 0,
+      charCount: legacy?.characters?.length || 0,
+      eventCount: legacy?.events?.length || 0,
+      color: '#2d6a4f',
+    };
+    saveProjects([defaultProj]);
+    // Migrate legacy data
+    if (legacy) {
+      localStorage.setItem(getProjectStorageKey('proj_default'), JSON.stringify({
+        ...legacy, lastSaved: Date.now()
+      }));
+    }
+    activeProjectId = 'proj_default';
+    localStorage.setItem(ACTIVE_PROJ_KEY, 'proj_default');
+    openProject('proj_default');
+    return;
+  }
+
+  if (lastId && projects.find(p => p.id === lastId)) {
+    // Re-open last active project directly
+    openProject(lastId);
+  } else {
+    // Show home screen to pick
+    renderProjectsGrid();
+    document.getElementById('home-screen').classList.add('open');
+  }
+}
+
+// Also save project whenever saveLocal is called — handled inside saveLocal above
+
+// Init lock screen, then load projects only once unlocked
+initLockScreen().then(() => {
+  // If lock screen was skipped (no password or already unlocked), init projects now
+  if (isSessionUnlocked()) {
+    initProjects();
+  }
+  // Otherwise, initProjects() is called inside submitLockPassword / submitSetupPassword / skipPassword
+});
+updateLockButton(hasPassword());
+updateApiKeyIndicator();
+// Hide API key button when running inside claude.ai (proxy handles auth)
+if (window.location.hostname.includes('claude.ai') || window.location.hostname.includes('anthropic.com')) {
+  const btn = document.getElementById('btn-api-key');
+  if (btn) btn.style.display = 'none';
+}
+</script>
+
+<!-- Embedded project snapshot — updated when you use Save File → HTML -->
+<script id="storyloom-snapshot" type="application/json">null</script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('Storyloom SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
+</script>
+</body>
+</html>
